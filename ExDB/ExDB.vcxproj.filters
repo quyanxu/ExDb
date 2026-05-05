@@ -1,0 +1,311 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Database">
+      <UniqueIdentifier>{49370ecb-3d44-41cc-8385-da63d880d637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Database\DbSet">
+      <UniqueIdentifier>{d164fc3c-0f3d-4c70-884f-9df9a1592924}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Define">
+      <UniqueIdentifier>{655520dd-ee23-48a7-8cb4-c214b7eff522}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ETC">
+      <UniqueIdentifier>{fe5fc42b-4592-4f18-bfa3-82e324b3d1e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ETC\WinUtil">
+      <UniqueIdentifier>{8732f710-5212-475b-af4b-0fe3ae2029ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IOCP">
+      <UniqueIdentifier>{ee59d341-81dc-4889-a8da-be95c9e11be7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APP">
+      <UniqueIdentifier>{bd5e1eab-44ba-4d2b-b197-e8f47e483807}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DirPath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BadSyntaxChk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MuNameCheck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogToFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServerMng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbset\GuildDBSet.cpp">
+      <Filter>Database\DbSet</Filter>
+    </ClCompile>
+    <ClCompile Include="GuildClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CQuery.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="dbset\CastleDBSet.cpp">
+      <Filter>Database\DbSet</Filter>
+    </ClCompile>
+    <ClCompile Include="dbset\FriendDBSet.cpp">
+      <Filter>Database\DbSet</Filter>
+    </ClCompile>
+    <ClCompile Include="dbset\GensSystemDBSet.cpp">
+      <Filter>Database\DbSet</Filter>
+    </ClCompile>
+    <ClCompile Include="dbset\PartyMatchingDBSet.cpp">
+      <Filter>Database\DbSet</Filter>
+    </ClCompile>
+    <ClCompile Include="FriendClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GensSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GuildListDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PartyMatching.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlusLogDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerListDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TGuildProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TUnionEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TUnionExInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Protocol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoSync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CWhatsUpDummyServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\winutil.cpp">
+      <Filter>ETC\WinUtil</Filter>
+    </ClCompile>
+    <ClCompile Include="WZWinsockBase.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="WZIocpEngine.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="WzQueue.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="WZScriptEncode.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="CExdbView.cpp">
+      <Filter>APP</Filter>
+    </ClCompile>
+    <ClCompile Include="CExdbDoc.cpp">
+      <Filter>APP</Filter>
+    </ClCompile>
+    <ClCompile Include="ExDB.cpp">
+      <Filter>APP</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>APP</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>APP</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LogProc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirPath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BadSyntaxChk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadScript.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MuNameCheck.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogToFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServerMng.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbset\GuildDBSet.h">
+      <Filter>Database\DbSet</Filter>
+    </ClInclude>
+    <ClInclude Include="GuildClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CQuery.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="dbset\CastleDBSet.h">
+      <Filter>Database\DbSet</Filter>
+    </ClInclude>
+    <ClInclude Include="dbset\FriendDBSet.h">
+      <Filter>Database\DbSet</Filter>
+    </ClInclude>
+    <ClInclude Include="dbset\GensSystemDBSet.h">
+      <Filter>Database\DbSet</Filter>
+    </ClInclude>
+    <ClInclude Include="dbset\PartyMatchingDBSet.h">
+      <Filter>Database\DbSet</Filter>
+    </ClInclude>
+    <ClInclude Include="FriendClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GensSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GuildListDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PartyMatching.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlusLogDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerListDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TGuildProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TUnionEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TUnionExInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WZAsyncEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\ProDef.h">
+      <Filter>Define</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoSync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\MSync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CWhatsUpDummyServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\winutil.h">
+      <Filter>ETC\WinUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\define.h">
+      <Filter>Define</Filter>
+    </ClInclude>
+    <ClInclude Include="WZWinsockBase.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="WZScriptEncode.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="WzQueue.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="WZIocpEngine.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="CExdbDoc.h">
+      <Filter>APP</Filter>
+    </ClInclude>
+    <ClInclude Include="CExdbView.h">
+      <Filter>APP</Filter>
+    </ClInclude>
+    <ClInclude Include="ExDB.h">
+      <Filter>APP</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>APP</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>APP</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\ExDB.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ExDB.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ExDBDoc.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Toolbar256.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="UserImages.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ExDB.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

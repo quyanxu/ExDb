@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{AF7C627F-EBAF-435B-A44D-EA0C19F98BE3}</ProjectGuid>
+    <RootNamespace>ExDB</RootNamespace>
+    <Keyword>MFCProj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v90</PlatformToolset>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseOfMfc>Static</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>17.0.35707.178</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0412</Culture>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformation>true</BrowseInformation>
+      <AdditionalIncludeDirectories>..\ExDB;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0412</Culture>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>LogProc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>
+      </OptimizeReferences>
+      <EnableCOMDATFolding>
+      </EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <MapExports>true</MapExports>
+      <AssemblyDebug>true</AssemblyDebug>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\winutil.cpp" />
+    <ClCompile Include="AutoSync.cpp" />
+    <ClCompile Include="BadSyntaxChk.cpp" />
+    <ClCompile Include="CExdbDoc.cpp" />
+    <ClCompile Include="CExdbView.cpp" />
+    <ClCompile Include="CWhatsUpDummyServer.cpp" />
+    <ClCompile Include="dbset\CastleDBSet.cpp" />
+    <ClCompile Include="dbset\FriendDBSet.cpp" />
+    <ClCompile Include="dbset\GensSystemDBSet.cpp" />
+    <ClCompile Include="dbset\PartyMatchingDBSet.cpp" />
+    <ClCompile Include="FriendClass.cpp" />
+    <ClCompile Include="GameServerMng.cpp" />
+    <ClCompile Include="GensSystem.cpp" />
+    <ClCompile Include="GuildClass.cpp" />
+    <ClCompile Include="CQuery.cpp" />
+    <ClCompile Include="GuildListDlg.cpp" />
+    <ClCompile Include="MThread.cpp" />
+    <ClCompile Include="PartyMatching.cpp" />
+    <ClCompile Include="PlusLogDlg.cpp" />
+    <ClCompile Include="Protocol.cpp" />
+    <ClCompile Include="ServerListDlg.cpp" />
+    <ClCompile Include="TGuildProcessor.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="TUnionEx.cpp" />
+    <ClCompile Include="TUnionExInfo.cpp" />
+    <ClCompile Include="WZIocpEngine.cpp" />
+    <ClCompile Include="WzQueue.cpp" />
+    <ClCompile Include="WZWinsockBase.cpp" />
+    <ClCompile Include="dbset\GuildDBSet.cpp" />
+    <ClCompile Include="DirPath.cpp" />
+    <ClCompile Include="ExDB.cpp" />
+    <ClCompile Include="LogToFile.cpp" />
+    <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MuNameCheck.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="WZScriptEncode.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\MSync.h" />
+    <ClInclude Include="..\common\winutil.h" />
+    <ClInclude Include="..\Include\define.h" />
+    <ClInclude Include="..\Include\ProDef.h" />
+    <ClInclude Include="AutoSync.h" />
+    <ClInclude Include="BadSyntaxChk.h" />
+    <ClInclude Include="CExdbDoc.h" />
+    <ClInclude Include="CExdbView.h" />
+    <ClInclude Include="CWhatsUpDummyServer.h" />
+    <ClInclude Include="dbset\CastleDBSet.h" />
+    <ClInclude Include="dbset\FriendDBSet.h" />
+    <ClInclude Include="dbset\GensSystemDBSet.h" />
+    <ClInclude Include="dbset\PartyMatchingDBSet.h" />
+    <ClInclude Include="FriendClass.h" />
+    <ClInclude Include="GameServerMng.h" />
+    <ClInclude Include="GensSystem.h" />
+    <ClInclude Include="GuildClass.h" />
+    <ClInclude Include="CQuery.h" />
+    <ClInclude Include="GuildListDlg.h" />
+    <ClInclude Include="Hash.h" />
+    <ClInclude Include="MThread.h" />
+    <ClInclude Include="PartyMatching.h" />
+    <ClInclude Include="PlusLogDlg.h" />
+    <ClInclude Include="Protocol.h" />
+    <ClInclude Include="ServerListDlg.h" />
+    <ClInclude Include="TGuildProcessor.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="TUnionEx.h" />
+    <ClInclude Include="TUnionExInfo.h" />
+    <ClInclude Include="WZAsyncEngine.h" />
+    <ClInclude Include="WZIocpEngine.h" />
+    <ClInclude Include="WzQueue.h" />
+    <ClInclude Include="WZWinsockBase.h" />
+    <ClInclude Include="dbset\GuildDBSet.h" />
+    <ClInclude Include="DirPath.h" />
+    <ClInclude Include="ExDB.h" />
+    <ClInclude Include="LogProc.h" />
+    <ClInclude Include="LogToFile.h" />
+    <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MuNameCheck.h" />
+    <ClInclude Include="ReadScript.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="WZScriptEncode.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\ExDB.ico" />
+    <None Include="res\ExDB.rc2" />
+    <None Include="res\ExDBDoc.ico" />
+    <None Include="res\Toolbar.bmp" />
+    <None Include="res\Toolbar256.bmp" />
+    <None Include="UserImages.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ExDB.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
