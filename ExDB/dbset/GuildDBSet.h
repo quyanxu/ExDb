@@ -16,6 +16,7 @@ public:
 	virtual ~CGuildDBSet();
 
 public:
+	int m_TotalCount;
 	int Connect();
 	int CheckDBID();
 	int DeleteGuild(char* Name);
@@ -58,18 +59,15 @@ public:
 	int SetGuildMatchingMemberCount(char* szGuildName, int nMemberCount);
 	int CleanGuildMatchingData();
 
-
-	CQuery m_UnionQry;
-	CQuery m_GuildMemberQry;
-	CQuery m_GuildMarkQry;
-	CQuery m_DBQuery;
-
 	CRITICAL_SECTION m_csUnionQry;
 	CRITICAL_SECTION m_csGuildMemberQry;
 	CRITICAL_SECTION m_csGuildMarkQry;
 	CRITICAL_SECTION m_csDBQuery;
 
-	int m_TotalCount;
+	CQuery m_UnionQry;
+	CQuery m_GuildMemberQry;
+	CQuery m_GuildMarkQry;
+	CQuery m_DBQuery;
 };
 
 extern CGuildDBSet* GuildDbSet;

@@ -40,13 +40,13 @@ int CFriendDBSet::Connect()
 		"WZ_DelMail"
 	};
 
-	if (!this->m_DBQueryFriend.Connect(3, szDbConnectDsn, szDbConnectId, szDbConnectPass))
+	if (!m_DBQueryFriend.Connect(3, szDbConnectDsn, szDbConnectId, szDbConnectPass))
 	{
 		MsgBox("Friend DB SET ODBC Connect Fail");
 		return FALSE;
 	}
 
-	if (!this->m_DBQueryMail.Connect(3, szDbConnectDsn, szDbConnectId, szDbConnectPass))
+	if (!m_DBQueryMail.Connect(3, szDbConnectDsn, szDbConnectId, szDbConnectPass))
 	{
 		MsgBox("Friend DB SET ODBC Connect Fail");
 		return FALSE;
@@ -54,7 +54,7 @@ int CFriendDBSet::Connect()
 
 	for (int n = 0; n < 5; n++)
 	{
-		if (!this->m_DBQueryFriend.TableCheck((char*)TableName[n]))
+		if (!m_DBQueryFriend.TableCheck((char*)TableName[n]))
 		{
 			MsgBox("[Friend] %s not Table", TableName[n]);
 		}
@@ -62,7 +62,7 @@ int CFriendDBSet::Connect()
 
 	for (int n = 0; n < 7; n++)
 	{
-		if (!this->m_DBQueryFriend.SPCheck((char*)SPName[n]))
+		if (!m_DBQueryFriend.SPCheck((char*)SPName[n]))
 		{
 			MsgBox("[Friend] %s not script", SPName[n]);
 		}
@@ -79,13 +79,13 @@ int CFriendDBSet::CreateGuid(char* szName)
 
 	qSql.Format("WZ_UserGuidCreate '%s'", szName);
 
-	if (this->m_DBQueryFriend.Exec((LPSTR)(LPCSTR)qSql))
+	if (m_DBQueryFriend.Exec((LPSTR)(LPCSTR)qSql))
 	{
-		this->m_DBQueryFriend.Clear();
+		m_DBQueryFriend.Clear();
 		return TRUE;
 	}
 
-	this->m_DBQueryFriend.Clear();
+	m_DBQueryFriend.Clear();
 	return FALSE;
 }
 
@@ -99,25 +99,25 @@ int CFriendDBSet::GetGuid(char* szName, int* memoCount)
 		"SELECT GUID, MemoTotal FROM T_FriendMain WHERE Name='%s'",
 		szName);
 
-	if (!this->m_DBQueryFriend.Exec((LPSTR)(LPCSTR)qSql))
+	if (!m_DBQueryFriend.Exec((LPSTR)(LPCSTR)qSql))
 	{
-		this->m_DBQueryFriend.Clear();
+		m_DBQueryFriend.Clear();
 		return -1;
 	}
 
-	short sqlRet = this->m_DBQueryFriend.Fetch();
+	short sqlRet = m_DBQueryFriend.Fetch();
 
 	if (sqlRet == SQL_NO_DATA || sqlRet == SQL_ERROR)
 	{
-		this->m_DBQueryFriend.Clear();
+		m_DBQueryFriend.Clear();
 		return -1;
 	}
 
-	int guid = this->m_DBQueryFriend.GetInt(1);
+	int guid = m_DBQueryFriend.GetInt(1);
 
-	*memoCount = this->m_DBQueryFriend.GetInt(2);
+	*memoCount = m_DBQueryFriend.GetInt(2);
 
-	this->m_DBQueryFriend.Clear();
+	m_DBQueryFriend.Clear();
 
 	return guid;
 }
@@ -162,9 +162,9 @@ int CFriendDBSet::GetFriendList(char* szName, _FRIEND_INFO_STRUCT* lpNode)
 		"SELECT FriendGuid, FriendName, Del FROM T_FriendList WHERE GUID=%d",
 		guid);
 
-	if (!this->m_DBQueryFriend.Exec(qSql))
+	if (!m_DBQueryFriend.Exec(qSql))
 	{
-		this->m_DBQueryFriend.Clear();
+		m_DBQueryFriend.Clear();
 		return FALSE;
 	}
 
@@ -175,20 +175,20 @@ int CFriendDBSet::GetFriendList(char* szName, _FRIEND_INFO_STRUCT* lpNode)
 
 	while (true)
 	{
-		short sqlRet = this->m_DBQueryFriend.Fetch();
+		short sqlRet = m_DBQueryFriend.Fetch();
 
 		if (sqlRet == SQL_NO_DATA || sqlRet == SQL_ERROR)
 		{
 			break;
 		}
 
-		int FriendGuid = this->m_DBQueryFriend.GetInt(1);
+		int FriendGuid = m_DBQueryFriend.GetInt(1);
 
 		char szFriendName[20] = { 0 };
 
-		this->m_DBQueryFriend.GetStr("FriendName", szFriendName);
+		m_DBQueryFriend.GetStr("FriendName", szFriendName);
 
-		int del = this->m_DBQueryFriend.GetInt(3);
+		int del = m_DBQueryFriend.GetInt(3);
 
 		lpNode->Use[count] = (del == 1) ? 30000 : 1;
 
@@ -211,7 +211,7 @@ int CFriendDBSet::GetFriendList(char* szName, _FRIEND_INFO_STRUCT* lpNode)
 	lpNode->Count = count;
 	lpNode->MailCount = memoCount;
 
-	this->m_DBQueryFriend.Clear();
+	m_DBQueryFriend.Clear();
 
 	return TRUE;
 }
@@ -222,22 +222,22 @@ int CFriendDBSet::FriendAdd(char* szName, char* szFriendName)
 	CAutoSync AutoSync(&this->m_csDBQueryFriend);
 	qSql.Format("WZ_FriendAdd '%s', '%s'", szName, szFriendName);
 
-	if (!this->m_DBQueryFriend.Exec(qSql))
+	if (!m_DBQueryFriend.Exec(qSql))
 	{
 		return 0;
 	}
 
-	short sqlRet = this->m_DBQueryFriend.Fetch();
+	short sqlRet = m_DBQueryFriend.Fetch();
 
 	if (sqlRet == SQL_NO_DATA || sqlRet == SQL_ERROR)
 	{
 		cLog.AddTD("error-L3 : Friend Add fail %s %s", szName, szFriendName);
-		this->m_DBQueryFriend.Clear();
+		m_DBQueryFriend.Clear();
 		return 0;
 	}
 
-	int result = this->m_DBQueryFriend.GetInt(1);
-	this->m_DBQueryFriend.Clear();
+	int result = m_DBQueryFriend.GetInt(1);
+	m_DBQueryFriend.Clear();
 	cLog.AddTD("friend add result %s %s %d", szName, szFriendName, result);
 
 	return result;
@@ -249,25 +249,25 @@ unsigned char CFriendDBSet::FriendWaitAdd(char* szName, char* szFriendName)
 	CAutoSync AutoSync(&this->m_csDBQueryFriend);
 	qSql.Format("WZ_WaitFriendAdd '%s', '%s'", szFriendName, szName);
 
-	if (!this->m_DBQueryFriend.Exec((LPSTR)(LPCSTR)qSql))
+	if (!m_DBQueryFriend.Exec((LPSTR)(LPCSTR)qSql))
 	{
 		cLog.AddTD("WZ_WaitFriendAdd run fail %s %s", szName, szFriendName);
-		this->m_DBQueryFriend.Clear();
+		m_DBQueryFriend.Clear();
 		return 0;
 	}
 
-	short sqlRet = this->m_DBQueryFriend.Fetch();
+	short sqlRet = m_DBQueryFriend.Fetch();
 
 	if (sqlRet == SQL_NO_DATA || sqlRet == SQL_ERROR)
 	{
 		cLog.AddTD("error-L3 : friend wait add fail %s %s", szName, szFriendName);
-		this->m_DBQueryFriend.Clear();
+		m_DBQueryFriend.Clear();
 		return 0;
 	}
 
-	int result = this->m_DBQueryFriend.GetInt(1);
+	int result = m_DBQueryFriend.GetInt(1);
 
-	this->m_DBQueryFriend.Clear();
+	m_DBQueryFriend.Clear();
 
 	if (result == 0)
 	{
@@ -448,24 +448,24 @@ int CFriendDBSet::ReadMemoSubject(int aIndex, char* UserName, unsigned short Use
 
 	qSql.Format("SELECT MemoIndex, FriendName, wDate, Subject, bRead ""FROM T_FriendMail WHERE GUID=%d", guid);
 
-	if (this->m_DBQueryMail.Exec(qSql) == TRUE)
+	if (m_DBQueryMail.Exec(qSql) == TRUE)
 	{
 		while (true)
 		{
-			short sqlRet = this->m_DBQueryMail.Fetch();
+			short sqlRet = m_DBQueryMail.Fetch();
 
 			if (sqlRet == SQL_NO_DATA || sqlRet == SQL_ERROR)
 			{
 				break;
 			}
 
-			int MemoIndex = this->m_DBQueryMail.GetInt(1);
+			int MemoIndex = m_DBQueryMail.GetInt(1);
 
-			this->m_DBQueryMail.GetStr(2, szFriendName.GetBuffer());
-			this->m_DBQueryMail.GetStr(3, szDate);
-			this->m_DBQueryMail.GetStr(4, szSubject);
+			m_DBQueryMail.GetStr(2, szFriendName.GetBuffer());
+			m_DBQueryMail.GetStr(3, szDate);
+			m_DBQueryMail.GetStr(4, szSubject);
 
-			BYTE read = (BYTE)this->m_DBQueryMail.GetInt(5);
+			BYTE read = (BYTE)m_DBQueryMail.GetInt(5);
 
 			DGFriendMemoList(aIndex, UserIndex, MemoIndex, szFriendName.GetBuffer(), UserName, szDate, szSubject, read);
 
@@ -473,7 +473,7 @@ int CFriendDBSet::ReadMemoSubject(int aIndex, char* UserName, unsigned short Use
 		}
 	}
 
-	this->m_DBQueryMail.Clear();
+	m_DBQueryMail.Clear();
 
 	return TRUE;
 }
@@ -559,26 +559,26 @@ int CFriendDBSet::ReadMemo(int aIndex, int memoIndex, int guid, char* Memo, BYTE
 
 	qSql.Format("SELECT bRead, Dir, Act ""FROM T_FriendMail ""WHERE MemoIndex=%d AND GUID=%d", memoIndex, guid);
 
-	if (this->m_DBQueryMail.Exec((LPSTR)(LPCSTR)qSql) != TRUE)
+	if (m_DBQueryMail.Exec((LPSTR)(LPCSTR)qSql) != TRUE)
 	{
-		this->m_DBQueryMail.Clear();
+		m_DBQueryMail.Clear();
 		return FALSE;
 	}
 
-	short sqlRet = this->m_DBQueryMail.Fetch();
+	short sqlRet = m_DBQueryMail.Fetch();
 
 	if (sqlRet != SQL_NO_DATA && sqlRet != SQL_ERROR)
 	{
-		read = this->m_DBQueryMail.GetInt(1);
+		read = m_DBQueryMail.GetInt(1);
 
-		int ret = this->m_DBQueryMail.GetInt(2);
+		int ret = m_DBQueryMail.GetInt(2);
 
 		if (ret >= 0)
 		{
 			*Dir = (BYTE)ret;
 		}
 
-		ret = this->m_DBQueryMail.GetInt(3);
+		ret = m_DBQueryMail.GetInt(3);
 
 		if (ret >= 0)
 		{
@@ -586,26 +586,26 @@ int CFriendDBSet::ReadMemo(int aIndex, int memoIndex, int guid, char* Memo, BYTE
 		}
 	}
 
-	this->m_DBQueryMail.Clear();
+	m_DBQueryMail.Clear();
 
 	cLog.Add("ReadMemo MemoIndex:%d", memoIndex);
 
 	qSql.Format("SELECT Photo FROM T_FriendMail ""WHERE MemoIndex='%d' AND GUID=%d", memoIndex, guid);
 
-	memset(Photo, 0, 0x12);
+	memset(Photo, 0, MAX_PREVIEWCHARSET+9);
 
-	this->m_DBQueryMail.ReadBlob(qSql, Photo);
+	m_DBQueryMail.ReadBlob(qSql, Photo);
 
 	qSql.Format("SELECT Memo FROM T_FriendMail ""WHERE MemoIndex='%d' AND GUID=%d", memoIndex, guid);
 
-	*strsize = this->m_DBQueryMail.ReadBlob(qSql, (BYTE*)Memo);
+	*strsize = m_DBQueryMail.ReadBlob(qSql, (BYTE*)Memo);
 
 	if (!read)
 	{
 		qSql.Format("UPDATE T_FriendMail ""SET bRead=1 ""WHERE MemoIndex=%d AND GUID=%d", memoIndex, guid);
 
-		this->m_DBQueryMail.Exec((LPSTR)(LPCSTR)qSql);
-		this->m_DBQueryMail.Clear();
+		m_DBQueryMail.Exec((LPSTR)(LPCSTR)qSql);
+		m_DBQueryMail.Clear();
 	}
 
 	return TRUE;

@@ -629,7 +629,7 @@ void CGuildClass::AllGuildSend(int aIndex)
         LeaveCriticalSection(&this->m_guild_cs);
     }
 }
-//class CListCtrl* guildLB, class CListBox* memberLB
+
 int CGuildClass::GuildListAddDlg(class CListCtrl* guildLB, class CListBox* memberLB)
 {
     int count = 0;
@@ -697,7 +697,7 @@ int CGuildClass::GuildListAddDlg(class CListCtrl* guildLB, class CListBox* membe
     return 0;
 }
 
-unsigned int __stdcall GuildSendThread(void* p)
+DWORD WINAPI GuildSendThread(LPVOID* p)
 {
     int count = GuildSendThreadCount++;
 

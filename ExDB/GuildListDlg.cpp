@@ -7,8 +7,6 @@
 #define new DEBUG_NEW
 #endif
 
-extern CGuildClass CGuildManager;
-
 IMPLEMENT_DYNAMIC(CGuildListDlg, CDialog)
 
 BEGIN_MESSAGE_MAP(CGuildListDlg, CDialog)

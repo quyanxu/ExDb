@@ -536,16 +536,17 @@ int CWZIocpEngine::RecvDataParse(_PER_HANDLE_DATA* lpPerHandleData)
 	BYTE RecvBuffer[8200];
 	_PerIoData* p_PerIoDataRecv;
 	BYTE headcode;
-	BYTE xcode = 0;
-	int count = 0;
-	int lOfs = 0;
+	BYTE xcode;
+	int count;
+	int lOfs;
 	LPBYTE recvbuf;
 
 	if (lpPerHandleData->PerIoDataRecv.bOfs < 3)
 	{
 		return true;
 	}
-
+	xcode = 0;
+	count = 0;
 	memset(RecvBuffer, 0, MAX_IO_BUFFER_SIZE);
 	p_PerIoDataRecv = &lpPerHandleData->PerIoDataRecv;
 	recvbuf = (LPBYTE)lpPerHandleData->PerIoDataRecv.Buffer;

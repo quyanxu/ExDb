@@ -10,11 +10,23 @@
 
 IMPLEMENT_DYNAMIC(CServerListDlg, CDialog)
 
+//BEGIN_MESSAGE_MAP(CServerListDlg, CDialog)
+//    ON_BN_CLICKED(IDC_GSLISTSEND, OnBtnGuildlistsend)
+//    ON_WM_SHOWWINDOW()
+//    ON_COMMAND(IDREFRESH, OnRefresh)
+//    ON_BN_CLICKED(IDCLOSE, On_Close)
+//END_MESSAGE_MAP()
+
 BEGIN_MESSAGE_MAP(CServerListDlg, CDialog)
-    ON_BN_CLICKED(IDC_GSLISTSEND, OnBtnGuildlistsend)
+    // WM_COMMAND, ID 0x3F2 (1010) - OnBtnGuildlistsend()
+    ON_COMMAND(IDC_GSLISTSEND, OnBtnGuildlistsend)
+    // WM_SHOWWINDOW - OnShowWindow(BOOL, UINT)
     ON_WM_SHOWWINDOW()
+    // WM_COMMAND, ID 2 - OnRefresh()
     ON_COMMAND(IDREFRESH, OnRefresh)
-    ON_BN_CLICKED(IDCLOSE, On_Close)
+    // IDCLOSE (IDOK = 1) is NOT in the original message map!
+    // The Close button uses IDOK and is handled by CDialog's default OnOK/OnCancel
+    //ON_BN_CLICKED(IDCLOSE, On_Close)
 END_MESSAGE_MAP()
 
 CServerListDlg::CServerListDlg(CWnd* pParent)

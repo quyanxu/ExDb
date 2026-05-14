@@ -1,6 +1,16 @@
 #ifndef __WZQUEUE_H__
 #define __WZQUEUE_H__
 
+struct _PER_IO_CONTEXT_L : public OVERLAPPED
+{
+	_WSABUF wsabuf;
+	char Buffer[MAX_IO_BUFFER_SIZE];
+	int nTotalBytes;
+	int nSentBytes;
+	int IOOperation;
+	void* ListNode;
+};
+
 typedef struct _ListNode
 {
 	_ListNode* pUpLink;
@@ -11,6 +21,7 @@ typedef struct _ListNode
 	int nOfs;
 	BYTE headcode;
 	int uindex;
+	_PER_IO_CONTEXT_L IoCtxt;
 } ListNode;
 
 #define MAX_NODE		1280

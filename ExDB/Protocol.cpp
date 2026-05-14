@@ -21,23 +21,6 @@
 // External Globals
 // ----------------------------------------------------------------------
 
-
-
-//extern WZQueue FriendQueue;
-//extern WZQueue MailQueue;
-//extern CFriendClass CFriendManager; // idb
-
-
-//extern CPartyMatching g_PartyMatching;
-//extern CPartyMatchingDBSet g_PartyMatching_DBSet;
-//extern CLogProc cLog;
-//extern CMuNameCheck gMuName; // idb
-//extern CGuildDBSet GuildDbSet; // idb
-//CFriendDBSet FriendDbSet; // idb
-//extern CCastleDBSet CastleDbSet; // idb
-//GensSystem g_GensSystem; // idb
-//GensSystem_DBSet g_GensSystem_DBSet; // idb
-
 MSync<int> g_Sync; // idb
 
 // ----------------------------------------------------------------------
@@ -46,9 +29,9 @@ MSync<int> g_Sync; // idb
 
 int ProtocolCore(BYTE ProtocolNumber, LPBYTE RecvBuffer, SIZE_T RecvLength, int Index)
 {
-	//BYTE Type;
+#ifdef DEBUG_PROTOCOL
 	cLog.Add("Protocol:0x%x", ProtocolNumber);
-
+#endif
 	switch (ProtocolNumber)
 	{
 		// =========================================================
@@ -173,7 +156,6 @@ int ProtocolCore(BYTE ProtocolNumber, LPBYTE RecvBuffer, SIZE_T RecvLength, int 
 	{
 		if (g_bEnableFriendMail)
 		{
-			//PBMSG_HEAD* lpHead = (PBMSG_HEAD*)RecvBuffer;
 			MailQueue.AddToQueue(RecvBuffer, RecvLength, ProtocolNumber, Index);
 		}
 	}
@@ -333,7 +315,9 @@ int ProtocolCore(BYTE ProtocolNumber, LPBYTE RecvBuffer, SIZE_T RecvLength, int 
 		//if (RecvBuffer->Type)
 	{
 		PBMSG_HEAD2* lpDef = (PBMSG_HEAD2*)RecvBuffer;
-		//cLog.Add("GENSProtocol:0x%x", RecvBuffer->Type);
+#ifdef DEBUG_PROTOCOL
+		cLog.Add("GENSProtocol:0x%x", RecvBuffer->Type);
+#endif
 		//switch (RecvBuffer->Type | 0xF800)
 		WORD wPacketType = MAKEWORD(lpDef->subcode, 0xF8);
 		switch (wPacketType)
@@ -413,7 +397,7 @@ void GetJoinInfo(SDHP_SERVERINFO* lpMsg, short aIndex)
 
 	pResult.h.c = 0xC1;
 	pResult.h.headcode = 0x00;
-	pResult.h.size = 0x08;
+	pResult.h.size = sizeof(pResult);
 	pResult.Result = 1;
 
 	if (!gsm.Set(aIndex, lpMsg->Port, lpMsg->Type, lpMsg->ServerName, lpMsg->ServerCode, lpMsg->btGameServerType))
@@ -422,7 +406,7 @@ void GetJoinInfo(SDHP_SERVERINFO* lpMsg, short aIndex)
 		cLog.Add("Client Join Fail");
 	}
 
-	WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, &pResult.h.c, 8);
+	WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, &pResult.h.c, sizeof(pResult));
 }
 
 void GDCharacterClose(SDHP_USERCLOSE* lpMsg, short aIndex)
@@ -485,8 +469,8 @@ void GSGuildCreate(SDHP_GUILDCREATE* lpMsg, int aIndex)
 	pMsg.NumberH = lpMsg->NumberH;
 	pMsg.NumberL = lpMsg->NumberL;
 
-	char guildname[MAX_GUILDNAMESTRING+1] = { 0 };
-	char guildmaster[MAX_IDSTRING+1] = { 0 };
+	char guildname[MAX_GUILDNAMESTRING + 1] = { 0 };
+	char guildmaster[MAX_IDSTRING + 1] = { 0 };
 
 	memcpy(guildname, lpMsg->GuildName, MAX_GUILDNAMESTRING);
 	memcpy(guildmaster, lpMsg->Master, MAX_IDSTRING);
@@ -929,7 +913,7 @@ void GDGuildAllSend(int aIndex, SDHP_GUILDMEMBER_INFO_GUILDNAME_REQUEST* lpRecv)
 
 	memcpy(sendbuf, &pCount, sizeof(SDHP_GUILDALL_COUNT));
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < MAX_SERVEROBJECT; i++)
 	{
 		if (gsm.m_Obj[i].m_Used && gsm.m_Obj[i].m_Type == 1)
 		{
@@ -1016,8 +1000,8 @@ void GDGuildDestroy(SDHP_GUILDDESTROY* lpMsg, int aIndex)
 #pragma message("sizes changed here")
 	SDHP_GUILDDESTROY_RESULT pMsg;
 
-	char szGuildName[MAX_GUILDNAMESTRING+1] = {};
-	char szMaster[MAX_IDSTRING+1] = {};
+	char szGuildName[MAX_GUILDNAMESTRING + 1] = {};
+	char szMaster[MAX_IDSTRING + 1] = {};
 
 	memcpy(pMsg.Master, lpMsg->Master, MAX_IDSTRING);
 	memcpy(pMsg.GuildName, lpMsg->GuildName, MAX_GUILDNAMESTRING);
@@ -1041,7 +1025,7 @@ void GDGuildDestroy(SDHP_GUILDDESTROY* lpMsg, int aIndex)
 	if (strlen(szMaster) < 3)
 	{
 		pMsg.Result = 3;
-		cLog.Add("error-L3 : ID Length %s %s %d",szMaster,__FILE__,__LINE__);
+		cLog.Add("error-L3 : ID Length %s %s %d", szMaster, __FILE__, __LINE__);
 	}
 
 	// -------------------------
@@ -1050,7 +1034,7 @@ void GDGuildDestroy(SDHP_GUILDDESTROY* lpMsg, int aIndex)
 	if (strlen(szGuildName) < 2)
 	{
 		pMsg.Result = 3;
-		cLog.Add("error-L3 : GuildName Length %s %s %d",szGuildName,__FILE__,__LINE__);
+		cLog.Add("error-L3 : GuildName Length %s %s %d", szGuildName, __FILE__, __LINE__);
 	}
 
 	// -------------------------
@@ -1132,8 +1116,8 @@ void GDGuildDestroy(SDHP_GUILDDESTROY* lpMsg, int aIndex)
 		if (gsm.m_Obj[n].m_Used && gsm.m_Obj[n].m_Type == ST_GAMESERVER)
 		{
 			pMsg.Flag = (aIndex == n);
-			WzIoEngine->send(gsm.m_Obj[n].lpPHD,&pMsg.h.c,sizeof(SDHP_GUILDDESTROY_RESULT));
-			cLog.Add("%d [%s] guild delete send result %d",n, szGuildName, pMsg.Result);
+			WzIoEngine->send(gsm.m_Obj[n].lpPHD, &pMsg.h.c, sizeof(SDHP_GUILDDESTROY_RESULT));
+			cLog.Add("%d [%s] guild delete send result %d", n, szGuildName, pMsg.Result);
 		}
 	}
 }
@@ -1142,8 +1126,8 @@ void GDGuildMemberAdd(SDHP_GUILDMEMBERADD* lpMsg, int aIndex)
 {
 	SDHP_GUILDMEMBERADD_RESULT pMsg;
 
-	char memberID[MAX_IDSTRING+1] = {};
-	char guildName[MAX_GUILDNAMESTRING+1] = {};
+	char memberID[MAX_IDSTRING + 1] = {};
+	char guildName[MAX_GUILDNAMESTRING + 1] = {};
 
 	memcpy(memberID, lpMsg->MemberID, MAX_IDSTRING);
 	memcpy(guildName, lpMsg->GuildName, MAX_GUILDNAMESTRING);
@@ -1235,8 +1219,8 @@ void GDGuildMemberAddWithoutUserIndex(SDHP_GUILDMEMBERADD_WITHOUT_USERINDEX* lpM
 	pMsg.h.size = sizeof(pMsg);
 	pMsg.Result = 0;
 
-	char memberID[MAX_IDSTRING+1] = {};
-	char guildName[MAX_GUILDNAMESTRING+1] = {};
+	char memberID[MAX_IDSTRING + 1] = {};
+	char guildName[MAX_GUILDNAMESTRING + 1] = {};
 
 	memcpy(memberID, lpMsg->MemberID, MAX_IDSTRING);
 	memcpy(guildName, lpMsg->GuildName, MAX_GUILDNAMESTRING);
@@ -1321,8 +1305,8 @@ void GDGuildMemberDel(SDHP_GUILDMEMBERDEL* lpMsg, int aIndex)
 	pMsg.NumberH = lpMsg->NumberH;
 	pMsg.NumberL = lpMsg->NumberL;
 
-	char memberID[MAX_IDSTRING+1] = {};
-	char guildName[MAX_GUILDNAMESTRING+1] = {};
+	char memberID[MAX_IDSTRING + 1] = {};
+	char guildName[MAX_GUILDNAMESTRING + 1] = {};
 
 	memcpy(memberID, lpMsg->MemberID, MAX_IDSTRING);
 	memcpy(guildName, lpMsg->GuildName, MAX_GUILDNAMESTRING);
@@ -1350,7 +1334,7 @@ void GDGuildMemberDel(SDHP_GUILDMEMBERDEL* lpMsg, int aIndex)
 	}
 	else
 	{
-		cLog.Add("error-L3 : guild member delete fail. %s %s",guildName, memberID);
+		cLog.Add("error-L3 : guild member delete fail. %s %s", guildName, memberID);
 		pMsg.Result = 3;
 	}
 
@@ -1375,7 +1359,7 @@ void GDGuildMemberDel(SDHP_GUILDMEMBERDEL* lpMsg, int aIndex)
 
 void GDGuildScoreUpdateRecv(SDHP_GUILDSCOREUPDATE* lpMsg)
 {
-	char szGuildName[MAX_GUILDNAMESTRING+1] = {};
+	char szGuildName[MAX_GUILDNAMESTRING + 1] = {};
 	memcpy(szGuildName, lpMsg->GuildName, MAX_GUILDNAMESTRING);
 
 	// decompiler artifact: v1 is strlen(szGuildName)
@@ -1460,7 +1444,7 @@ void DGFriendList(_FRIEND_INFO_STRUCT* lpNode, int aIndex)
 
 	for (int n = 1; n < lpNode->Count; n++)
 	{
-		_FRIEND_INFO_STRUCT* lpFriendNode =CFriendManager.Search(lpNode->Names[n]);
+		_FRIEND_INFO_STRUCT* lpFriendNode = CFriendManager.Search(lpNode->Names[n]);
 		// default offline
 		pMsg.Server = -1;
 
@@ -1478,7 +1462,7 @@ void DGFriendList(_FRIEND_INFO_STRUCT* lpNode, int aIndex)
 				lpNode->pServer[n] = lpFriendNode->pServer[0];
 				lpNode->ServerIndex[n] = lpFriendNode->sIndex;
 
-				CFriendManager.SetConnectMember(lpFriendNode,lpNode->Name,lpNode->Number,lpNode->pServer[0],aIndex);
+				CFriendManager.SetConnectMember(lpFriendNode, lpNode->Name, lpNode->Number, lpNode->pServer[0], aIndex);
 			}
 		}
 		else
@@ -1488,9 +1472,9 @@ void DGFriendList(_FRIEND_INFO_STRUCT* lpNode, int aIndex)
 
 		// serialize friend entry
 		memcpy(&pMsg, lpNode->Names[n], MAX_IDSTRING);
-		memcpy(&sendBuf[offset], &pMsg, MAX_IDSTRING+1);
+		memcpy(&sendBuf[offset], &pMsg, MAX_IDSTRING + 1);
 
-		offset += MAX_IDSTRING+1;
+		offset += MAX_IDSTRING + 1;
 		count++;
 	}
 
@@ -1963,7 +1947,7 @@ void GDFriendDelReq(FHP_FRIEND_ADD_REQ* lpMsg, int aIndex)
 
 	if (lpNode)
 	{
-		DGFriendStateSend(FriendName.GetBuffer(),Name.GetBuffer(),0xFF,lpNode->Number,lpNode->sIndex);
+		DGFriendStateSend(FriendName.GetBuffer(), Name.GetBuffer(), 0xFF, lpNode->Number, lpNode->sIndex);
 	}
 }
 
@@ -1980,12 +1964,12 @@ void GDFriendMemoSend(FHP_FRIEND_MEMO_SEND* lpMsg, int aIndex)
 	char_ID szRecvName(lpMsg->ToName);
 
 	// Clear and copy subject (0x20 = 32 bytes)
-	memset(Subject, 0, 33);  // 0x21
-	memcpy(Subject, lpMsg->Subject, 32);  // 0x20
+	memset(Subject, 0, MAX_MEMO_SUBJECT+1);  // 0x21
+	memcpy(Subject, lpMsg->Subject, MAX_MEMO_SUBJECT);  // 0x20
 
 	// Copy memo if size is valid (max 1000 bytes)
-	memset(Memo, 0, 1001);  // 0x3E9
-	if (lpMsg->MemoSize <= 1000)
+	memset(Memo, 0, MAX_MEMO +1);  // 0x3E9
+	if (lpMsg->MemoSize <= MAX_MEMO)
 	{
 		memcpy(Memo, lpMsg->Memo, lpMsg->MemoSize);
 		result = 1;
@@ -2002,7 +1986,7 @@ void GDFriendMemoSend(FHP_FRIEND_MEMO_SEND* lpMsg, int aIndex)
 	{
 		// Prepare SQL-safe subject
 		memset(szSQLSubject, 0, 65);  // 0x41
-		memcpy(szSQLSubject, Subject, 32);  // 0x20
+		memcpy(szSQLSubject, Subject, MAX_MEMO_SUBJECT);  // 0x20
 
 		BYTE Action = lpMsg->Action;
 		BYTE Dir = lpMsg->Dir;
@@ -2036,7 +2020,7 @@ void GDFriendMemoSend(FHP_FRIEND_MEMO_SEND* lpMsg, int aIndex)
 	}
 
 	// Log the result
-	cLog.Add("%s -> %s mail save Result: %d memoindex:%d",szSendName.GetBuffer(),szRecvName.GetBuffer(),pMsg.Result,result);
+	cLog.Add("%s -> %s mail save Result: %d memoindex:%d", szSendName.GetBuffer(), szRecvName.GetBuffer(), pMsg.Result, result);
 
 	// Send result back to sender
 	WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, &pMsg.h.c, sizeof(FHP_FRIEND_MEMO_SEND_RESULT));
@@ -2125,9 +2109,9 @@ void GDFriendMemoRead(FHP_FRIEND_MEMO_RECV_REQ* lpMsg, int aIndex)
 	memcpy(pMsg.Name, lpMsg->Name, sizeof(pMsg.Name));
 	pMsg.MemoSize = sizeOut[0];
 
-	if (pMsg.MemoSize > 1000)
+	if (pMsg.MemoSize > MAX_MEMO)
 	{
-		pMsg.MemoSize = 1000;
+		pMsg.MemoSize = MAX_MEMO;
 		cLog.AddTD("error-L2 memo size clamp");
 	}
 
@@ -2155,7 +2139,7 @@ void GDFriendMemoDel(FHP_FRIEND_MEMO_DEL_REQ* lpMsg, int aIndex)
 	pMsg.Number = lpMsg->Number;
 	memcpy(pMsg.Name, lpMsg->Name, sizeof(pMsg.Name));
 
-	pMsg.Result = FriendDbSet->DelMemo(name.GetBuffer(),lpMsg->MemoIndex);
+	pMsg.Result = FriendDbSet->DelMemo(name.GetBuffer(), lpMsg->MemoIndex);
 
 	pMsg.MemoIndex = lpMsg->MemoIndex;
 	WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, &pMsg.h.c, sizeof(pMsg));
@@ -2201,7 +2185,7 @@ void GDFriendChatRoomCreateRecv(FHP_FRIEND_CHATROOM_CREATE_REQ* lpMsg, int Index
 	// 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式
 	// 3. Search for friend's room membership
 	// 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式
-	int searchResult = CFriendManager.SearchMemberRoom(lpNode,szFriendName.GetBuffer(),friendNumber,fserver,room);
+	int searchResult = CFriendManager.SearchMemberRoom(lpNode, szFriendName.GetBuffer(), friendNumber, fserver, room);
 
 	if (searchResult < 0)
 	{
@@ -2275,7 +2259,7 @@ void GDFriendInvitationRecv(FHP_FRIEND_INVITATION_REQ* lpMsg, int aIndex)
 	{
 		if (CFriendManager.GetChatveto(lpFriendNode))
 		{
-			DGRoomInvitationReq(szFriendName.GetBuffer(),lpMsg->RoomNumber,lpFriendNode->sIndex,lpFriendNode->Number,1);
+			DGRoomInvitationReq(szFriendName.GetBuffer(), lpMsg->RoomNumber, lpFriendNode->sIndex, lpFriendNode->Number, 1);
 
 			cLog.Add("Msg-L3 : friend Invitation req : %s->%s ROOM:%d Server:%d User:%d",
 				szName.GetBuffer(),
@@ -2297,7 +2281,7 @@ void GDFriendInvitationRecv(FHP_FRIEND_INVITATION_REQ* lpMsg, int aIndex)
 	}
 	else
 	{
-		cLog.Add("Msg-L3: friend Invitation req fail: user not connected %s",szFriendName.GetBuffer());
+		cLog.Add("Msg-L3: friend Invitation req fail: user not connected %s", szFriendName.GetBuffer());
 		pMsg.Result = 0;
 	}
 
@@ -2670,7 +2654,7 @@ void GDRelationShipReqBreakOff(EXSDHP_RELATIONSHIP_BREAKOFF_REQ* lpMsg, int iSer
 		}
 	}
 }
-#pragma message("ida output was bed need to check")
+#pragma message("ida output was bad need to check")
 void GDUnionListReq(EXSDHP_UNION_LIST_REQ* lpRecvMsg, int iServerIndex)
 {
 	// Stack variables - match original layout as closely as possible
@@ -2928,10 +2912,7 @@ void DGRelationShipListSend(_GUILD_INFO_STRUCT* lpGuildInfo, int iRelationShipTy
 
 		if (lpGuildInfo->iGuildUnion != 0)
 		{
-			memcpy(
-				pMsg.szUnionMasterGuildName,
-				pUnionExInfo->m_szMasterGuild,
-				8);
+			memcpy(pMsg.szUnionMasterGuildName, pUnionExInfo->m_szMasterGuild, 8);
 		}
 		else
 		{
@@ -3089,7 +3070,7 @@ void GDRelationShipReqKickOutUnionMember(EXSDHP_KICKOUT_UNIONMEMBER_REQ* lpMsg, 
 		for (int n = 0; n < MAX_SERVEROBJECT; ++n)
 		{
 			if (gsm.m_Obj[n].m_Used &&
-				gsm.m_Obj[n].m_Type == 1 &&
+				gsm.m_Obj[n].m_Type == ST_GAMESERVER &&
 				n != iServerIndex)
 			{
 				WzIoEngine->send(gsm.m_Obj[n].lpPHD, (BYTE*)&pMsg.h, sizeof(EXSDHP_KICKOUT_UNIONMEMBER_RESULT));
@@ -3365,7 +3346,7 @@ void GDReqGuildMatchingList(_stReqGuildMatchingList* lpMsg, int iServerIndex)
 	memcpy(pMsg.stGuildMatchingList, stGuildMatchingList, sizeof(pMsg.stGuildMatchingList));
 
 	// Send response
-	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT-1)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (BYTE*)&pMsg.h.c, sizeof(_stAnsGuildMatchingList));
 	}
@@ -3434,7 +3415,7 @@ void GDReqGuildMatchingListSearchWord(_stReqGuildMatchingListSearchWord* lpMsg, 
 	memcpy(pMsg.stGuildMatchingList, stGuildMatchingList, sizeof(pMsg.stGuildMatchingList));
 
 	// Send response
-	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT-1)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (BYTE*)&pMsg.h.c, sizeof(_stAnsGuildMatchingList));
 	}
@@ -3522,7 +3503,7 @@ void GDDeleteGuildMatching(_stReqDelGuildMatchingList* lpMsg, int iServerIndex)
 			int aIndex = lpFindMember->sIndex;
 			if (gsm.m_Obj[aIndex].m_Used)
 			{
-				if (gsm.m_Obj[aIndex].m_Type == 1)  // Game server
+				if (gsm.m_Obj[aIndex].m_Type == ST_GAMESERVER)  // Game server
 				{
 					_stAnsNotiGuildMatching pNotiMsg;
 					memset(&pNotiMsg, 0, sizeof(pNotiMsg));
@@ -3825,7 +3806,7 @@ void GDReqAllowJoinGuildMatching(_stReqAllowJoinGuildMatching* lpMsg, int iServe
 	memcpy(pMsg.szGuildName, szGuildName, MAX_GUILDNAMESTRING);
 
 	// Send response to guild master's server
-	if (iServerIndex >= 0 && iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (BYTE*)&pMsg.h, sizeof(_stAnsAllowJoinGuildMatching));
 	}
@@ -3853,7 +3834,7 @@ void GDReqAllowJoinGuildMatching(_stReqAllowJoinGuildMatching* lpMsg, int iServe
 	}
 
 	// Send notification to applicant if online (and not already rejected by state)
-	for (int n = 0; n < 100; ++n)
+	for (int n = 0; n < MAX_SERVEROBJECT; ++n)
 	{
 		if (gsm.m_Obj[n].m_Used &&
 			gsm.m_Obj[n].m_Type == 1 &&
@@ -3896,7 +3877,7 @@ void DGAnsSendNotiGuildMatching(char* szName, int nUserIndex, int nServerIndex)
 	pMsg.nUserIndex = nUserIndex;
 	pMsg.nResult = nState;
 
-	if (nServerIndex >= 0 && nServerIndex <= 99)
+	if (nServerIndex >= 0 && nServerIndex <= MAX_SERVEROBJECT + 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[nServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(_stAnsNotiGuildMatching));
 	}
@@ -3933,7 +3914,7 @@ void DGAnsUseGuildMatchingGuild(int nGuildNumber)
 	}
 
 	// Send to the guild master's server if connected
-	for (int n = 0; n < 100; ++n)
+	for (int n = 0; n < MAX_SERVEROBJECT; ++n)
 	{
 		if (gsm.m_Obj[n].m_Used && gsm.m_Obj[n].m_Type == 1 && aIndex == n)
 		{
@@ -3971,7 +3952,7 @@ void DGAnsSendNotiGuildMatchingForGuildMaster(int nGuildNumber)
 	}
 
 	// Send to the guild master's server if connected
-	for (int n = 0; n < 100; ++n)
+	for (int n = 0; n < MAX_SERVEROBJECT; ++n)
 	{
 		if (gsm.m_Obj[n].m_Used && gsm.m_Obj[n].m_Type == 1 && aIndex == n)
 		{
@@ -4096,7 +4077,7 @@ void GDReqRegPartyMatchingList(_stReqRegWantedPartyMember* lpMsg, int iServerInd
 	pMsg.nUserIndex = lpMsg->nUserIndex;
 
 	// Send response
-	if (iServerIndex >= 0 && iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (BYTE*)&pMsg.h, sizeof(_stAnsRegWantedPartyMember));
 	}
@@ -4188,7 +4169,7 @@ void GDReqGetPartyMatchingList(_stReqGetPartyMatchingList* lpMsg, int iServerInd
 	memcpy(pMsg.stPartyInfoList, stPartyInfoList, sizeof(pMsg.stPartyInfoList));
 
 	// Send response
-	if (iServerIndex >= 0 && iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT + 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (BYTE*)&pMsg.h.c, sizeof(_stAnsGetPartyMatchingList));
 	}
@@ -4283,12 +4264,9 @@ void GDReqMemeberJoinPartyMatching(_stReqJoinMemberPartyMatching* lpMsg, int iSe
 					if (btAcceptType[0] == 1)
 					{
 						GDAutoMemberJoin(szLeaderName, szMemberName, lpMsg->nUserIndex, iServerIndex, lpMsg->nLevel, lpMsg->btClass);
-
 						return;
 					}
-
 					g_PartyMatching_DBSet.InsertWaitPartyMatching(szLeaderName, szMemberName, lpMsg->btChangeUpClass, lpMsg->nLevel, lpMsg->nUserDBNumber);
-
 					nResult = 0;
 				}
 			}
@@ -4333,7 +4311,6 @@ void GDReqMemeberJoinPartyMatching(_stReqJoinMemberPartyMatching* lpMsg, int iSe
 							}
 
 							g_PartyMatching_DBSet.InsertWaitPartyMatching(szLeaderName, szMemberName, lpMsg->btChangeUpClass, lpMsg->nLevel, lpMsg->nUserDBNumber);
-
 							nResult = 0;
 						}
 						else
@@ -4356,7 +4333,6 @@ void GDReqMemeberJoinPartyMatching(_stReqJoinMemberPartyMatching* lpMsg, int iSe
 								}
 
 								g_PartyMatching_DBSet.InsertWaitPartyMatching(szLeaderName, szMemberName, lpMsg->btChangeUpClass, lpMsg->nLevel, lpMsg->nUserDBNumber);
-
 								nResult = 0;
 							}
 						}
@@ -4377,15 +4353,11 @@ void GDReqMemeberJoinPartyMatching(_stReqJoinMemberPartyMatching* lpMsg, int iSe
 	if (nResult == 0 && lpTargetParty && lpTargetParty->stPartyMember[0].bLogOn && lpTargetParty->stPartyMember[0].bUse)
 	{
 		pNotiMsg.h.set((LPBYTE)&pNotiMsg, 0xA4, 0x08, sizeof(pNotiMsg));
-
 		nLeaderServerIndex = lpTargetParty->stPartyMember[0].nServerIndex;
-
 		nLeaderUserIndex = lpTargetParty->stPartyMember[0].nUserIndex;
-
 		pNotiMsg.nUserIndex = nLeaderUserIndex;
 
-		if (nLeaderServerIndex >= 0 &&
-			nLeaderServerIndex <= 99)
+		if (nLeaderServerIndex >= 0 && nLeaderServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[nLeaderServerIndex].lpPHD, (LPBYTE)&pNotiMsg, sizeof(pNotiMsg));
 		}
@@ -4404,8 +4376,7 @@ void GDReqMemeberJoinPartyMatching(_stReqJoinMemberPartyMatching* lpMsg, int iSe
 
 	pMsg.h.set((LPBYTE)&pMsg, 0xA4, 0x02, sizeof(pMsg));
 
-	if (iServerIndex >= 0 &&
-		iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (LPBYTE)&pMsg, sizeof(pMsg));
 	}
@@ -4467,8 +4438,7 @@ void GDReqMemberJoinStateList(_stReqJoinMemberStateListPartyMatching* lpMsg, int
 	// Send result
 	// --------------------------------------------------------------------
 
-	if (iServerIndex >= 0 &&
-		iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (LPBYTE)&pMsg, sizeof(_stAnsJoinMemberStateListPartyMatching));
 	}
@@ -4505,7 +4475,7 @@ void GDReqMemberJoinStateListLeader(_stReqWaitListPartyMatching* lpMsg, int iSer
 		memcpy(pMsg.stList, stList, sizeof(pMsg.stList));
 	}
 
-	if (iServerIndex >= 0 && iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(_stAnsWaitListPartyMatching));
 	}
@@ -4584,7 +4554,7 @@ void GDReqCancelPartyMatching(_stReqCancePartyMatching* lpMsg, int iServerIndex)
 							nMemberServerIndex = lpParty->stPartyMember[i].nServerIndex;
 							pMsg.nUserIndex = lpParty->stPartyMember[i].nUserIndex;
 
-							if (nMemberServerIndex >= 0 && nMemberServerIndex <= 99)
+							if (nMemberServerIndex >= 0 && nMemberServerIndex <= MAX_SERVEROBJECT - 1)
 							{
 								WzIoEngine->send(gsm.m_Obj[nMemberServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(_stAnsCancePartyMatching));
 							}
@@ -4615,7 +4585,7 @@ void GDReqCancelPartyMatching(_stReqCancePartyMatching* lpMsg, int iServerIndex)
 
 							g_PartyMatching_DBSet.DeleteWaitList(stList[j].szName);
 
-							if (aIndex >= 0 && aIndex <= 99)
+							if (aIndex >= 0 && aIndex <= MAX_SERVEROBJECT - 1)
 							{
 								WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, (BYTE*)&pMsg, sizeof(_stAnsCancePartyMatching));
 							}
@@ -4637,7 +4607,7 @@ void GDReqCancelPartyMatching(_stReqCancePartyMatching* lpMsg, int iServerIndex)
 	pMsg.btType = btType;
 	pMsg.nUserIndex = nUserIndex;
 
-	if (iServerIndex >= 0 && iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(_stAnsCancePartyMatching));
 	}
@@ -4695,17 +4665,10 @@ void GDAutoMemberJoin(char* szLeaderName, char* szMemberName, int nMemberIndex, 
 
 	if (lpPartyInfo)
 	{
-		nLeaderIndex =
-			lpPartyInfo->stPartyMember[0].nUserIndex;
-
-		nLeaderServerChannel =
-			lpPartyInfo->stPartyMember[0].nServerChannel;
-
-		nLeaderServerIndex =
-			lpPartyInfo->stPartyMember[0].nServerIndex;
-
+		nLeaderIndex = lpPartyInfo->stPartyMember[0].nUserIndex;
+		nLeaderServerChannel = lpPartyInfo->stPartyMember[0].nServerChannel;
+		nLeaderServerIndex = lpPartyInfo->stPartyMember[0].nServerIndex;
 		pMsg.nUserIndex = nLeaderIndex;
-
 		int nServerChannel = gsm.m_Obj[iServerIndex].pServer;
 
 		nResult = g_PartyMatching.AddPartyMember(
@@ -4727,14 +4690,11 @@ void GDAutoMemberJoin(char* szLeaderName, char* szMemberName, int nMemberIndex, 
 			}
 			else
 			{
-				_PARTY_INFO_STRUCT* lpParty =
-					g_PartyMatching.SearchParty(szLeaderName);
+				_PARTY_INFO_STRUCT* lpParty = g_PartyMatching.SearchParty(szLeaderName);
 
 				if (lpParty)
 				{
-					g_PartyMatching_DBSet.UpdatePartyMemberCount(
-						lpParty->stPartyMember[0].Name,
-						lpParty->nCount);
+					g_PartyMatching_DBSet.UpdatePartyMemberCount(lpParty->stPartyMember[0].Name, lpParty->nCount);
 				}
 			}
 		}
@@ -4742,47 +4702,31 @@ void GDAutoMemberJoin(char* szLeaderName, char* szMemberName, int nMemberIndex, 
 		// send to leader
 		pMsg.btSendType = 0;
 
-		if (nLeaderServerIndex >= 0 &&
-			nLeaderServerIndex <= 99)
+		if (nLeaderServerIndex >= 0 && nLeaderServerIndex <= MAX_SERVEROBJECT - 1)
 		{
-			WzIoEngine->send(
-				gsm.m_Obj[nLeaderServerIndex].lpPHD,
-				(BYTE*)&pMsg,
-				sizeof(__stAnsAddPartyMember));
+			WzIoEngine->send(gsm.m_Obj[nLeaderServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(__stAnsAddPartyMember));
 		}
 		else
 		{
-			cLog.Add(
-				"error-L2 : Invalid index number %s %d",
-				__FILE__,
-				__LINE__);
+			cLog.Add("error-L2 : Invalid index number %s %d", __FILE__, __LINE__);
 		}
 
 		// send to member
 		pMsg.btSendType = 1;
 
 		if (nMemberServerIndex >= 0 &&
-			nMemberServerIndex <= 99)
+			nMemberServerIndex <= MAX_SERVEROBJECT - 1)
 		{
-			WzIoEngine->send(
-				gsm.m_Obj[nMemberServerIndex].lpPHD,
-				(BYTE*)&pMsg,
-				sizeof(__stAnsAddPartyMember));
+			WzIoEngine->send(gsm.m_Obj[nMemberServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(__stAnsAddPartyMember));
 		}
 		else
 		{
-			cLog.Add(
-				"error-L2 : Invalid index number %s %d",
-				__FILE__,
-				__LINE__);
+			cLog.Add("error-L2 : Invalid index number %s %d", __FILE__, __LINE__);
 		}
 
 		if (nLeaderServerIndex == iServerIndex)
 		{
-			DGFixPartyMember(
-				nLeaderIndex,
-				nMemberIndex,
-				nLeaderServerIndex);
+			DGFixPartyMember(nLeaderIndex, nMemberIndex, nLeaderServerIndex);
 		}
 
 		DGSendPartyMember(szLeaderName, 0);
@@ -4792,20 +4736,13 @@ void GDAutoMemberJoin(char* szLeaderName, char* szMemberName, int nMemberIndex, 
 		pMsg.nResult = -3;
 		pMsg.btSendType = 1;
 
-		if (nMemberServerIndex >= 0 &&
-			nMemberServerIndex <= 99)
+		if (nMemberServerIndex >= 0 && nMemberServerIndex <= MAX_SERVEROBJECT - 1)
 		{
-			WzIoEngine->send(
-				gsm.m_Obj[nMemberServerIndex].lpPHD,
-				(BYTE*)&pMsg,
-				sizeof(__stAnsAddPartyMember));
+			WzIoEngine->send(gsm.m_Obj[nMemberServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(__stAnsAddPartyMember));
 		}
 		else
 		{
-			cLog.Add(
-				"error-L2 : Invalid index number %s %d",
-				__FILE__,
-				__LINE__);
+			cLog.Add("error-L2 : Invalid index number %s %d", __FILE__, __LINE__);
 		}
 	}
 }
@@ -4871,7 +4808,6 @@ void GDReqAddPartyMember(__stReqAddPartyMember* lpMsg, int iServerIndex)
 	if (lpMsg->btAlradyParty)
 	{
 		nResult = g_PartyMatching.AddPartyMember(nServerChannel, aIndex, nMemberIndex, szMemberName, szLeaderName, lpMsg->nMemberLevel, lpMsg->btMemeberClass);
-
 		_PARTY_INFO_STRUCT* lpParty = g_PartyMatching.SearchParty(szLeaderName);
 
 		if (lpParty)
@@ -4886,8 +4822,7 @@ void GDReqAddPartyMember(__stReqAddPartyMember* lpMsg, int iServerIndex)
 			// Real join request
 			if (lpMsg->btType == 1)
 			{
-				_PARTY_INFO_STRUCT* pNode =
-					g_PartyMatching.SearchParty(szLeaderName);
+				_PARTY_INFO_STRUCT* pNode = g_PartyMatching.SearchParty(szLeaderName);
 
 				// Create party if manual join
 				if (lpMsg->btManualJoin == 1 && pNode == NULL)
@@ -4921,12 +4856,8 @@ void GDReqAddPartyMember(__stReqAddPartyMember* lpMsg, int iServerIndex)
 					}
 					else
 					{
-						cLog.Add(
-							"error-L2 : Invalid index number  %s %d",
-							__FILE__,
-							__LINE__);
+						cLog.Add("error-L2 : Invalid index number  %s %d", __FILE__, __LINE__);
 					}
-
 					return;
 				}
 
@@ -4965,31 +4896,25 @@ void GDReqAddPartyMember(__stReqAddPartyMember* lpMsg, int iServerIndex)
 				}
 
 				// Send to leader
-				if (iServerIndex >= 0 && iServerIndex <= 99)
+				if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 				{
 					WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (LPBYTE)&pMsg.h, sizeof(__stAnsAddPartyMember));
 				}
 				else
 				{
-					cLog.Add(
-						"error-L2 : Invalid index number  %s %d",
-						__FILE__,
-						__LINE__);
+					cLog.Add("error-L2 : Invalid index number  %s %d", __FILE__, __LINE__);
 				}
 
 				// Send to member
 				pMsg.btSendType = 1;
 
-				if (aIndex >= 0 && aIndex <= 99)
+				if (aIndex >= 0 && aIndex <= MAX_SERVEROBJECT - 1)
 				{
 					WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, (LPBYTE)&pMsg.h, sizeof(__stAnsAddPartyMember));
 				}
 				else
 				{
-					cLog.Add(
-						"error-L2 : Invalid index number  %s %d",
-						__FILE__,
-						__LINE__);
+					cLog.Add("error-L2 : Invalid index number  %s %d", __FILE__, __LINE__);
 				}
 
 				if (aIndex == iServerIndex && nResult == 0)
@@ -5008,23 +4933,20 @@ void GDReqAddPartyMember(__stReqAddPartyMember* lpMsg, int iServerIndex)
 				pMsg.btSendType = 0;
 				pMsg.btType = lpMsg->btType;
 
-				if (iServerIndex >= 0 && iServerIndex <= 99)
+				if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 				{
 					WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (LPBYTE)&pMsg.h, sizeof(__stAnsAddPartyMember));
 				}
 				else
 				{
-					cLog.Add(
-						"error-L2 : Invalid index number  %s %d",
-						__FILE__,
-						__LINE__);
+					cLog.Add("error-L2 : Invalid index number  %s %d", __FILE__, __LINE__);
 				}
 
 				if (g_PartyMatching.SearchParty(szLeaderName))
 				{
 					pMsg.btSendType = 1;
 
-					if (aIndex >= 0 && aIndex <= 99)
+					if (aIndex >= 0 && aIndex <= MAX_SERVEROBJECT - 1)
 					{
 						WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, (LPBYTE)&pMsg.h, sizeof(__stAnsAddPartyMember));
 					}
@@ -5040,22 +4962,15 @@ void GDReqAddPartyMember(__stReqAddPartyMember* lpMsg, int iServerIndex)
 			pMsg.nResult = -1;
 			pMsg.btSendType = 0;
 
-			if (iServerIndex >= 0 && iServerIndex <= 99)
+			if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 			{
-				WzIoEngine->send(
-					gsm.m_Obj[iServerIndex].lpPHD,
-					(LPBYTE)&pMsg.h,
-					sizeof(__stAnsAddPartyMember));
+				WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (LPBYTE)&pMsg.h, sizeof(__stAnsAddPartyMember));
 			}
 			else
 			{
-				cLog.Add(
-					"error-L2 : Invalid index number  %s %d",
-					__FILE__,
-					__LINE__);
+				cLog.Add("error-L2 : Invalid index number  %s %d", __FILE__, __LINE__);
 			}
 		}
-
 		g_PartyMatching_DBSet.DeleteWaitList(szMemberName);
 	}
 }
@@ -5069,7 +4984,7 @@ void DGFixPartyMember(int nLeaderIndex, int nMemberIndex, int nServerIndex)
 
 	pMsg.h.set((LPBYTE)&pMsg.h, 0xA4, 0x10, sizeof(__stAnsAddRealPartyMember));
 
-	if (nServerIndex >= 0 && nServerIndex <= 99)
+	if (nServerIndex >= 0 && nServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		WzIoEngine->send(gsm.m_Obj[nServerIndex].lpPHD, (LPBYTE)&pMsg.h, sizeof(__stAnsAddRealPartyMember));
 	}
@@ -5131,8 +5046,7 @@ void DGSendPartyMember(char* szLeaderName, int bEmptyList)
 			}
 		}
 
-		if (nSendServerIndex >= 0 &&
-			nSendServerIndex <= 99)
+		if (nSendServerIndex >= 0 && nSendServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[nSendServerIndex].lpPHD, (BYTE*)&pMsg, sizeof(pMsg));
 		}
@@ -5181,7 +5095,7 @@ void DGSendEmptyPartyMemberList(char* szMemberName)
 
 		int nSendServerIndex = lpPartyInfo->stPartyMember[i].nServerIndex;
 
-		if (nSendServerIndex >= 0 && nSendServerIndex <= 99)
+		if (nSendServerIndex >= 0 && nSendServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[nSendServerIndex].lpPHD, (LPBYTE)&pMsgSendList.h, sizeof(__stAnsSendPartyMemberList));
 		}
@@ -5220,11 +5134,7 @@ void GDDeletePartyUser(_stReqDelPartyUserPartyMatching* lpMsg, int iServerIndex)
 
 	if (lpPartyInfo == NULL)
 	{
-		cLog.Add(
-			"error-L2 : value is null  %s %d",
-			__FILE__,
-			__LINE__);
-
+		cLog.Add("error-L2 : value is null  %s %d", __FILE__, __LINE__);
 		return;
 	}
 
@@ -5253,19 +5163,13 @@ void GDDeletePartyUser(_stReqDelPartyUserPartyMatching* lpMsg, int iServerIndex)
 		if (strcmp(szTargetName, szLeaderName) != 0)
 		{
 			DGSendEmptyPartyMemberList(szTargetName);
-
 			g_PartyMatching.DelPartyMember(szTargetName, szLeaderName);
-
-			g_PartyMatching_DBSet.UpdatePartyMemberCount(
-				szLeaderName,
-				lpPartyInfo->nCount);
-
+			g_PartyMatching_DBSet.UpdatePartyMemberCount(szLeaderName, lpPartyInfo->nCount);
 			DGSendPartyMember(szLeaderName, 0);
 		}
 		else
 		{
 			memset(szNewLeader, 0, sizeof(szNewLeader));
-
 			bChangeLeader = 0;
 
 			if (g_PartyMatching.ChangeLeader(szLeaderName, szNewLeader, 0) == 1 && lpPartyInfo->nCount >= 2)
@@ -5286,7 +5190,7 @@ void GDDeletePartyUser(_stReqDelPartyUserPartyMatching* lpMsg, int iServerIndex)
 				pCancelMsg.btType = 0;
 				pCancelMsg.nUserIndex = nLeaderUserIndex;
 
-				if (nLeaderServerIndex >= 0 && nLeaderServerIndex <= 99)
+				if (nLeaderServerIndex >= 0 && nLeaderServerIndex <= MAX_SERVEROBJECT - 1)
 				{
 					WzIoEngine->send(gsm.m_Obj[nLeaderServerIndex].lpPHD, (LPBYTE)&pCancelMsg, sizeof(_stAnsCancePartyMatching));
 				}
@@ -5318,7 +5222,7 @@ void GDDeletePartyUser(_stReqDelPartyUserPartyMatching* lpMsg, int iServerIndex)
 	// self delete
 	if (pMsg.nUserIndex == pMsg.nTargetIndex)
 	{
-		if (iServerIndex >= 0 && iServerIndex <= 99)
+		if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (LPBYTE)&pMsg, sizeof(_stAnsDelPartyUserPartyMatching));
 		}
@@ -5332,7 +5236,7 @@ void GDDeletePartyUser(_stReqDelPartyUserPartyMatching* lpMsg, int iServerIndex)
 		// sender notify
 		pMsg.btType = 0;
 
-		if (iServerIndex >= 0 && iServerIndex <= 99)
+		if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, (LPBYTE)&pMsg, sizeof(_stAnsDelPartyUserPartyMatching));
 		}
@@ -5344,7 +5248,7 @@ void GDDeletePartyUser(_stReqDelPartyUserPartyMatching* lpMsg, int iServerIndex)
 		// target notify
 		pMsg.btType = 1;
 
-		if (nTargetServerIndex >= 0 && nTargetServerIndex <= 99)
+		if (nTargetServerIndex >= 0 && nTargetServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[nTargetServerIndex].lpPHD, (LPBYTE)&pMsg, sizeof(_stAnsDelPartyUserPartyMatching));
 		}
@@ -5365,7 +5269,7 @@ void AddFriendListForPartyMatching(int nNumber, char* szName, __int16 nServerind
 	_FRIEND_INFO_STRUCT* lpFindMember;
 
 	lpFindMember = CFriendManager.Search(szName);
-	if (nServerindex >= 0 && nServerindex <= 99)
+	if (nServerindex >= 0 && nServerindex <= MAX_SERVEROBJECT - 1)
 	{
 		if (!lpFindMember)
 			CFriendManager.Add(nNumber, szName, gsm.m_Obj[nServerindex].pServer, nServerindex);
@@ -5379,7 +5283,7 @@ void AddFriendListForPartyMatching(int nNumber, char* szName, __int16 nServerind
 void GServerDownDelParty(int nServer)
 {
 	_stAnsCancePartyMatching pMsg;
-	pMsg.h.set(0xA4, 6, 0x10);
+	pMsg.h.set(0xA4, 6, sizeof(pMsg));
 
 	// Process all parties whose leader is on the server that went down
 	_PARTY_INFO_STRUCT* lpSerchParty;
@@ -5399,18 +5303,13 @@ void GServerDownDelParty(int nServer)
 					int nMemberServerIndex = lpSerchParty->stPartyMember[nPartyCnt].nServerIndex;
 					pMsg.btType = 0;
 
-					if (nMemberServerIndex >= 0 && nMemberServerIndex <= 99)
+					if (nMemberServerIndex >= 0 && nMemberServerIndex <= MAX_SERVEROBJECT - 1)
 					{
-						WzIoEngine->send(
-							gsm.m_Obj[nMemberServerIndex].lpPHD,
-							(unsigned __int8*)&pMsg.h,
-							16);
+						WzIoEngine->send(gsm.m_Obj[nMemberServerIndex].lpPHD, (unsigned __int8*)&pMsg.h, sizeof(pMsg));
 					}
 					else
 					{
-						cLog.Add("error-L2 : Invalid index number  %s %d",
-							__FILE__,
-							__LINE__);
+						cLog.Add("error-L2 : Invalid index number  %s %d", __FILE__, __LINE__);
 					}
 				}
 			}
@@ -5420,9 +5319,7 @@ void GServerDownDelParty(int nServer)
 		_PARTY_MEMBER_WAIT_LIST stList[10];
 		memset(stList, 0, sizeof(stList));
 
-		int nListCount = g_PartyMatching_DBSet.GetPartyMatchingWaitListForLeader(
-			lpSerchParty->stPartyMember[0].Name,
-			stList);
+		int nListCount = g_PartyMatching_DBSet.GetPartyMatchingWaitListForLeader(lpSerchParty->stPartyMember[0].Name, stList);
 
 		// Notify waiting members that the party was cancelled
 		if (nListCount > 0)
@@ -5441,16 +5338,13 @@ void GServerDownDelParty(int nServer)
 					// Remove from wait list
 					g_PartyMatching_DBSet.DeleteWaitList(stList[i].szName);
 
-					if (aIndex >= 0 && aIndex <= 99)
+					if (aIndex >= 0 && aIndex <= MAX_SERVEROBJECT - 1)
 					{
 						WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, (unsigned __int8*)&pMsg.h, sizeof(_PARTY_MEMBER_WAIT_LIST));
 					}
 					else
 					{
-						cLog.Add(
-							"error-L2 : Invalid index number  %s %d",
-							__FILE__,
-							__LINE__);
+						cLog.Add("error-L2 : Invalid index number  %s %d", __FILE__, __LINE__);
 					}
 				}
 			}
@@ -5499,16 +5393,13 @@ void GDSendChattingMsgPartyMatching(_stReqChattingPartyMatching* lpMsg)
 
 		int nDstServerIndex = lpParty->stPartyMember[i].nServerIndex;
 
-		if (nDstServerIndex >= 0 && nDstServerIndex <= 99)
+		if (nDstServerIndex >= 0 && nDstServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[nDstServerIndex].lpPHD, (LPBYTE)&pMsg.h, sizeof(_stAnsChattingPartyMatching));
 		}
 		else
 		{
-			cLog.Add(
-				"error-L2 : Invalid index number %s %d",
-				__FILE__,
-				__LINE__);
+			cLog.Add("error-L2 : Invalid index number %s %d", __FILE__, __LINE__);
 		}
 	}
 }
@@ -5596,7 +5487,7 @@ void GDReqSwapPartyLeader(_stReqChangePartyLeader* lpMsg, int iServerIndex)
 	pMsg.btChangeType = 0;
 
 	// Send response to requesting server
-	if (iServerIndex >= 0 && iServerIndex <= 99)
+	if (iServerIndex >= 0 && iServerIndex <= MAX_SERVEROBJECT - 1)
 	{
 		if (IsOhterChannelLeader)
 			pMsg.btChangeType = 1;  // Different channel
@@ -5669,7 +5560,7 @@ void DGClearPartyWaitListForOldLeader(char* szLeaderName)
 
 		g_PartyMatching_DBSet.DeleteWaitList(stList[i].szName);
 
-		if (aIndex >= 0 && aIndex <= 99)
+		if (aIndex >= 0 && aIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[aIndex].lpPHD, (LPBYTE)&pCancelMsg.h, sizeof(_stAnsCancePartyMatching));
 		}
@@ -5714,7 +5605,7 @@ void DGSendDelTypePartyMember(char* szLeaderName, char* szTargetName, BYTE btDel
 
 		int nSendServerIndex = lpPartyInfo->stPartyMember[i].nServerIndex;
 
-		if (nSendServerIndex >= 0 && nSendServerIndex <= 99)
+		if (nSendServerIndex >= 0 && nSendServerIndex <= MAX_SERVEROBJECT - 1)
 		{
 			WzIoEngine->send(gsm.m_Obj[nSendServerIndex].lpPHD, (LPBYTE)&pMsgSendList.h, sizeof(_stAnsPartyMemberDelType));
 		}

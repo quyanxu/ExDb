@@ -18,6 +18,6 @@ public:
 
 private:
     WZQueue m_MsgQueue;
-    BOOL    m_IsDBConnected;
     CQuery* m_DBQuery;
+    BOOL    m_IsDBConnected;
 };

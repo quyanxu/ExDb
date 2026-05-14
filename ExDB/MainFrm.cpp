@@ -27,16 +27,41 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
 //const UINT uiFirstUserToolBarId = AFX_IDW_CONTROLBAR_FIRST + 40;
 //const UINT uiLastUserToolBarId = uiFirstUserToolBarId + iMaxUserToolbars - 1;
 
+//BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
+//	ON_WM_CREATE()
+//	ON_WM_SETFOCUS()
+//	ON_WM_TIMER()
+//	ON_WM_CLOSE()
+//	ON_MESSAGE(0x7E8, OnGuildListDlgClose)
+//	ON_MESSAGE(0x7E9, OnServerListDlgClose)
+//	ON_COMMAND(ID_GUILD_MANAGER, &CMainFrame::OnGuildManager)
+//	ON_COMMAND(ID_SERVER_MANAGER, &CMainFrame::OnServermngOpen)
+//	//ON_COMMAND(ID_VIEW_CUSTOMIZE, &CMainFrame::OnViewCustomize)
+//END_MESSAGE_MAP()
+
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
+	// WM_CREATE - OnCreate(tagCREATESTRUCTA*)
 	ON_WM_CREATE()
-	ON_WM_SETFOCUS()
-	ON_WM_TIMER()
+	// WM_DESTROY - OnDestroy()
+	ON_WM_DESTROY()
+	// WM_CLOSE - OnClose()
 	ON_WM_CLOSE()
+	// WM_TIMER - OnTimer(uint)
+	ON_WM_TIMER()
+	// WM_COMMAND, ID 0x8004 - OnGuildmngOpen()
+	ON_COMMAND(ID_GUILD_MANAGER, OnGuildmngOpen)
+	// WM_COMMAND, ID 0x8003 - OnServermngOpen()
+	ON_COMMAND(ID_SERVER_MANAGER, OnServermngOpen)
+	// WM_COMMAND, ID 0x8007 - OnMenuTest()
+	ON_COMMAND(0x8007, OnMenuTest)
+	// WM_COMMAND, ID 0x800A - OnPlusLog()
+	ON_COMMAND(ID_PLUS_LOG, OnPlusLog)
+	// WM_COMMAND, ID 0x8008 - OnFriendOnOff()
+	ON_COMMAND(0x8008, OnFriendOnOff)
+	// WM_COMMAND, ID 0x8006 - OnMailOnOff()
+	ON_COMMAND(0x8006, OnMailOnOff)
+	// WM_USER+0x7E8 - OnGuildListDlgClose(WPARAM, LPARAM)
 	ON_MESSAGE(0x7E8, OnGuildListDlgClose)
-	ON_MESSAGE(0x7E9, OnServerListDlgClose)
-	ON_COMMAND(ID_GUILD_MANAGER, &CMainFrame::OnGuildManager)
-	ON_COMMAND(ID_SERVER_MANAGER, &CMainFrame::OnServermngOpen)
-	//ON_COMMAND(ID_VIEW_CUSTOMIZE, &CMainFrame::OnViewCustomize)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -281,6 +306,28 @@ void CMainFrame::OnServermngOpen()
 
 	SLDlg->ShowWindow(SW_SHOW);
 	SLDlg->SetForegroundWindow();
+}
+
+void CMainFrame::OnMenuTest()
+{
+	;// Test/debug function - likely empty or has debug code
+}
+
+void CMainFrame::OnPlusLog()
+{
+	;// Toggle plus/extra logging
+}
+
+void CMainFrame::OnFriendOnOff()
+{
+	// Toggle friend system on/off
+	g_bEnableFriend = !g_bEnableFriend;
+}
+
+void CMainFrame::OnMailOnOff()
+{
+	// Toggle mail system on/off
+	g_bEnableFriendMail = !g_bEnableFriendMail;
 }
 
 // CMainFrame Áø´Ü

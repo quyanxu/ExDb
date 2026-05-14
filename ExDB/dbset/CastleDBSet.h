@@ -13,11 +13,10 @@ public:
 
 public:
     int Connect();
-
     int CheckCastleSiegeGuildList(char* szGuildName);
 
-    CQuery m_CastleDBQuery;
     CRITICAL_SECTION m_csCastleDBQuery;
+    CQuery m_CastleDBQuery;
 };
 
 // ----------------------------------------------------------------------

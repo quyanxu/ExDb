@@ -32,10 +32,10 @@ public:
     unsigned int GetRivalMemberCount();
 
 public:
+    int m_iMasterGuild;
+    _GUILD_INFO_STRUCT* m_lpMasterGuildInfo;
+    char m_szMasterGuild[MAX_GUILDNAMESTRING+1];      // 8 bytes + null terminator (as per memcpy 8u)
     std::map<int, _GUILD_INFO_STRUCT*> m_mpUnionMember;
     std::map<int, _GUILD_INFO_STRUCT*> m_mpRivalMember;
     MSync<int> m_Sync;
-    char m_szMasterGuild[9];      // 8 bytes + null terminator (as per memcpy 8u)
-    int m_iMasterGuild;
-    _GUILD_INFO_STRUCT* m_lpMasterGuildInfo;
 };

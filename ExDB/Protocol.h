@@ -572,10 +572,18 @@ struct FHP_FRIEND_MEMO_RECV
 	char Name[MAX_IDSTRING];
 	WORD MemoIndex;
 	short MemoSize;
-	BYTE Photo[18];
+#ifdef ITEM_INDEX_EXTEND_20050706
+	BYTE		Photo[MAX_PREVIEWCHARSET + 9];
+#else
+#ifdef DARKLORD_WORK
+	BYTE		Photo[MAX_PREVIEWCHARSET + 4];
+#else
+	BYTE		Photo[MAX_PREVIEWCHARSET + 3];
+#endif
+#endif
 	BYTE Dir;
 	BYTE Action;
-	char Memo[1000];
+	char Memo[MAX_MEMO];
 };
 
 /* 5384 */
@@ -1473,8 +1481,8 @@ struct FHP_FRIEND_MEMO_LIST
 	WORD MemoIndex;
 	char SendName[MAX_IDSTRING];
 	char RecvName[MAX_IDSTRING];
-	char Date[30];
-	char Subject[32];
+	char Date[MAX_DATE];
+	char Subject[MAX_MEMO_SUBJECT];
 	BYTE read;
 };
 
@@ -1540,12 +1548,20 @@ struct FHP_FRIEND_MEMO_SEND
 	DWORD WindowGuid;
 	char Name[MAX_IDSTRING];
 	char ToName[MAX_IDSTRING];
-	char Subject[32];
+	char Subject[MAX_MEMO_SUBJECT];
 	BYTE Dir;
 	BYTE Action;
 	short MemoSize;
-	BYTE Photo[18];
-	char Memo[1000];
+#ifdef ITEM_INDEX_EXTEND_20050706
+	BYTE		Photo[MAX_PREVIEWCHARSET + 9];
+#else
+#ifdef DARKLORD_WORK
+	BYTE		Photo[MAX_PREVIEWCHARSET + 4];
+#else
+	BYTE		Photo[MAX_PREVIEWCHARSET + 3];
+#endif
+#endif
+	char Memo[MAX_MEMO];
 };
 
 

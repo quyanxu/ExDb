@@ -85,20 +85,15 @@ public:
 	void wz_Bigprintf(char* szlog, ...);
 
 public:
-	HANDLE m_cp;
-
 	WORD m_ServerPort;
-	int m_MaxListen;
-	int m_ThreadCount;
-	int m_Blank;
-
 	DWORD m_ThreadID;
 	HANDLE m_hThreadHandle;
-
+	int m_ThreadCount;
+	int m_MaxListen;
+	HANDLE m_cp;
+	int m_Blank;
 	CRITICAL_SECTION m_cs;
-
 	_PER_HANDLE_DATA* lpPerHandleData[MAX_OBJECTS];
-
 public:
 	int (*WZIocpEngine_AcceptFunc)(_PER_HANDLE_DATA*);
 	int (*WZIocpEngine_CloseFunc)(_PER_HANDLE_DATA*);

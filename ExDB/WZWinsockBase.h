@@ -4,14 +4,12 @@
 class CWZWinsockBase
 {
 public:
-
-    SOCKET m_socket;
     int m_iMaxSockets;
-    int m_Connect;
-    int m_recvbufsize;
-    int m_sendbufsize;
     HWND m_hWnd;
-
+    SOCKET m_socket;
+    int m_sendbufsize;
+    int m_recvbufsize;
+    int m_Connect;
 public:
 
     CWZWinsockBase();

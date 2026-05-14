@@ -57,6 +57,7 @@ public:
 private:
 	_FRIEND_INFO_STRUCT* head;
 	_FRIEND_INFO_STRUCT* tail;
+	_FRIEND_INFO_STRUCT* pNewNode;
 
 	int m_count;
 	int m_OnOffCount;

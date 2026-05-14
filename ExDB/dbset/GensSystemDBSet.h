@@ -33,8 +33,8 @@ public:
 
 public:
 	CQuery             m_GensMemberQry;
-	int                m_iSecedeChkDay;
 	CRITICAL_SECTION   m_csGensMemberQry;
+	int                m_iSecedeChkDay;
 };
 
 extern GensSystem_DBSet g_GensSystem_DBSet;

@@ -68,23 +68,23 @@ public:
     int GuildListAddDlg(class CListCtrl* guildLB, class CListBox* memberLB);
 
 public:
-    std::map<std::string, _GUILD_INFO_STRUCT*> m_GuildMap;
-    std::map<int, _GUILD_INFO_STRUCT*> m_GuildNumberMap;
-
     _GUILD_INFO_STRUCT* head;
     _GUILD_INFO_STRUCT* tail;
-
-    int m_count;
 
     int m_OnOff;
     int m_OnOffCount;
 
-    CRITICAL_SECTION m_guild_cs;
-
     _GUILD_INFO_STRUCT* pGuildViewCursor;
+
+    std::map<std::string, _GUILD_INFO_STRUCT*> m_GuildMap;
+    std::map<int, _GUILD_INFO_STRUCT*> m_GuildNumberMap;
+
+    int m_count;
+
+    CRITICAL_SECTION m_guild_cs;
 };
 
 
 extern int GuildSendThreadCount;
 
-unsigned int __stdcall GuildSendThread(void* p);
+DWORD WINAPI GuildSendThread(LPVOID* p);

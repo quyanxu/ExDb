@@ -47,6 +47,10 @@ protected:
 	afx_msg void OnClose();
 	afx_msg void OnGuildManager();
 	afx_msg void OnServermngOpen();
+	afx_msg void OnMenuTest();
+	afx_msg void OnPlusLog();
+	afx_msg void OnFriendOnOff();
+	afx_msg void OnMailOnOff();
 	afx_msg LRESULT OnGuildListDlgClose(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnServerListDlgClose(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()

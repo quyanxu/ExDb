@@ -26,8 +26,8 @@ public:
 	CRITICAL_SECTION m_csDBQueryFriend;
 	CRITICAL_SECTION m_csDBQueryMail;
 
-	CQuery m_DBQueryFriend;
-	CQuery m_DBQueryMail;
+	//CQuery m_DBQueryFriend;
+	//CQuery m_DBQueryMail;
 };
 
 extern CFriendDBSet* FriendDbSet;

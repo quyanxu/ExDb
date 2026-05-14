@@ -57,8 +57,8 @@ char    szKorItemTextFileName[256];
 char    szSkillTextFileName[256];
 char    szItemTextFileName[256];
 char    szSystemMailAdmin[11]; // idb
-char    szSystemMailMemo[1000]; // idb
-char    szSystemMailSubject[32]; // idb
+char    szSystemMailMemo[MAX_MEMO]; // idb
+char    szSystemMailSubject[MAX_MEMO_SUBJECT]; // idb
 int     gLanguage; // idb
 char    szDbConnectDsn[]; // idb
 char    szDbConnectPass[]; // idb
@@ -203,7 +203,7 @@ int CExdbApp::DataLoad()
     // Load mail configuration
     GetPrivateProfileStringA("MAIL", "Account", "Webzen", szSystemMailAdmin, 10, ".\\ExDBSystemMail.cfg");
     GetPrivateProfileStringA("MAIL", "Subject", "None", szSystemMailSubject, 32, ".\\ExDBSystemMail.cfg");
-    GetPrivateProfileStringA("MAIL", "Memo", "None", szSystemMailMemo, 1000, ".\\ExDBSystemMail.cfg");
+    GetPrivateProfileStringA("MAIL", "Memo", "None", szSystemMailMemo, MAX_MEMO, ".\\ExDBSystemMail.cfg");
     gExpireDayForCleanGuildMatching = GetPrivateProfileIntA("MAIL", "ExpireDay", 14, ".\\ExDBSystemMail.cfg");
 
     // Load Korean files (always needed)

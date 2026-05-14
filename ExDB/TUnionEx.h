@@ -7,10 +7,6 @@
 #include "GuildClass.h"     // Contains _GUILD_INFO_STRUCT and related defines
 #include "dbset/GuildDBSet.h"
 
-//class CGuildClass;
-//class CGuildDBSet;
-//class CWZIocpEngine;
-
 class TUnionEx
 {
 public:
@@ -58,10 +54,10 @@ public:
 public:
     std::map<int, TUnionExInfo*> m_mpUnion;
     std::vector<TUnionExInfo*> m_vtUnion;
-    MSync<int> m_Sync;
     CGuildClass* m_pGuildClass;
     CGuildDBSet* m_pGuildDBSet;
     CWZIocpEngine* m_pIoEngine;
+    MSync<int> m_Sync;
 };
 
 // Global instance (declare extern in header, define in one cpp)
