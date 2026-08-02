@@ -902,7 +902,7 @@ void GDGuildAllSend(int aIndex, SDHP_GUILDMEMBER_INFO_GUILDNAME_REQUEST* lpRecv)
 		lpGuildInfo = CGuildManager.SearchGuild_Number(lpGuild->iGuildRival);
 
 		if (lpGuildInfo)
-			memcpy(pCount.szGuildRivalName, lpGuildInfo->Name, 8);
+			memcpy(pCount.szGuildRivalName, lpGuildInfo->Name, MAX_GUILDNAMESTRING);
 		else
 			memset(pCount.szGuildRivalName, 0, sizeof(pCount.szGuildRivalName));
 	}
@@ -2321,7 +2321,7 @@ void DCChatRoomInvitation(FHP_CHAT_ROOMINVITATION* lpMsg)
 	}
 
 	FHP_FRIEND_CHATROOM_CREATE_RESULT pMsg;
-	pMsg.h.set(&pMsg.h.c, 0x66u, sizeof(pMsg));
+	pMsg.h.set(&pMsg.h.c, 0x66, sizeof(pMsg));
 
 	pMsg.Result = 1;
 	pMsg.Number = lpNode->Number;
@@ -2347,7 +2347,7 @@ void CDCreateChatRoomResult(FHP_CHAT_ROOMCREATE_RESULT* lpMsg)
 	int serverIndex = lpMsg->ServerNumber;
 
 	FHP_FRIEND_CHATROOM_CREATE_RESULT pMsg;
-	pMsg.h.set(&pMsg.h.c, 0x66u, sizeof(pMsg));
+	pMsg.h.set(&pMsg.h.c, 0x66, sizeof(pMsg));
 	pMsg.Result = lpMsg->Result;
 	pMsg.Number = lpMsg->UserNumber;
 	pMsg.Type = lpMsg->Type;
@@ -2434,7 +2434,7 @@ void GDGuildReqAssignStatus(EXSDHP_GUILD_ASSIGN_STATUS_REQ* lpMsg, int iServerIn
 
 void GDGuildReqAssignType(EXSDHP_GUILD_ASSIGN_TYPE_REQ* lpMsg, int iServerIndex)
 {
-	lpMsg->szGuildName[8] = 0;
+	lpMsg->szGuildName[MAX_GUILDNAMESTRING] = 0;
 
 	EXSDHP_GUILD_ASSIGN_TYPE_RESULT pMsg;//18
 
@@ -2654,112 +2654,80 @@ void GDRelationShipReqBreakOff(EXSDHP_RELATIONSHIP_BREAKOFF_REQ* lpMsg, int iSer
 		}
 	}
 }
-#pragma message("ida output was bad need to check")
+
 void GDUnionListReq(EXSDHP_UNION_LIST_REQ* lpRecvMsg, int iServerIndex)
 {
-	// Stack variables - match original layout as closely as possible
-	_GUILD_INFO_STRUCT* lpGuild = NULL;
-	std::map<int, _GUILD_INFO_STRUCT*>::iterator it, itEnd;
-	TUnionExInfo* lpUnion = NULL;
-	int iMasterGuildNumber = 0;
-	_GUILD_INFO_STRUCT* lpReqGuild = NULL;
-	unsigned char* lpBuf = NULL;
-	unsigned char* lpEntryPtr = NULL;
-	unsigned int nEntryCount = 0;
-	unsigned char dst[8196] = { 0 };  // Match original: 8196 byte stack buffer
-	int nCleanupFlag = 0;           // Removed LOBYTE usage, kept for structure only
+	BYTE Buffer[8196];
 
-	// Initialize buffer pointers and header fields (exact original offsets)
-	nEntryCount = 0;
-	memset(dst, 0, 0x2000u);        // Clear first 8KB (original used 0x2000)
-	lpBuf = dst;                    // Base pointer for packet
-	lpEntryPtr = &dst[16];          // Entries start at offset 16
+	EXSDHP_UNION_LIST_COUNT* lpMsg = reinterpret_cast<EXSDHP_UNION_LIST_COUNT*>(Buffer);
+	EXSDHP_UNION_LIST* lpList = reinterpret_cast<EXSDHP_UNION_LIST*>(lpMsg + 1);
+	DWORD dwMemberCount = 0;
 
-	// Static header fields (matches original byte-for-byte)
-	dst[4] = 0;                     // btResult = 0 (default fail)
-	dst[5] = 1;                     // Placeholder success flag (may be overwritten)
-	*(WORD*)&dst[6] = lpRecvMsg->wRequestUserIndex;
-	*(DWORD*)&dst[8] = GetTickCount();
-	dst[12] = 0;                    // btRivalCount
-	dst[13] = 0;                    // btUnionCount
+	lpMsg->btCount = 0;
+	memset(Buffer, 0, 0x2000);
+	lpMsg->btResult = 1;
+	lpMsg->wRequestUserIndex = lpRecvMsg->wRequestUserIndex;
+	lpMsg->iTimeStamp = GetTickCount();
+	lpMsg->btRivalMemberNum = 0;
+	lpMsg->btUnionMemberNum = 0;
 
-	// 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式
-	// Lookup master guild
-	// 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式
-	lpReqGuild = CGuildManager.SearchGuild_Number(lpRecvMsg->iUnionMasterGuildNumber);
+	_GUILD_INFO_STRUCT* lpGuild = CGuildManager.SearchGuild_Number(lpRecvMsg->iUnionMasterGuildNumber);
 
-	if (lpReqGuild && lpReqGuild->iGuildUnion)
+	if (lpGuild)
 	{
-		// Thread-safe access
-		g_Sync.Lock();
-
-		iMasterGuildNumber = lpReqGuild->iGuildUnion;
-		lpUnion = UnionExManager.SearchUnion(iMasterGuildNumber);
-
-		if (!lpUnion)
+		if (lpGuild->iGuildUnion)
 		{
-			lpBuf[5] = 0;  // Mark as failure
-		}
+			g_Sync.Lock();
 
-		if (lpBuf[5] == 1)  // Only serialize if union found
-		{
-			// Store map sizes (cast to BYTE to match protocol)
-			lpBuf[12] = static_cast<unsigned char>(lpUnion->m_mpRivalMember.size());
-			lpBuf[13] = static_cast<unsigned char>(lpUnion->m_mpUnionMember.size());
+			TUnionExInfo* lpUnion = UnionExManager.SearchUnion(lpGuild->iGuildUnion);
 
-			// Iterate union members using explicit iterator (VS2008 compatible)
-			it = lpUnion->m_mpUnionMember.begin();
-			itEnd = lpUnion->m_mpUnionMember.end();
-
-			nCleanupFlag = 1;  // Iterator scope marker (removed LOBYTE usage)
-
-			while (it != itEnd && nEntryCount <= 100)
+			if (lpUnion == NULL)
 			{
-				lpGuild = it->second;  // Get _GUILD_INFO_STRUCT* from map value
-
-				if (lpGuild)
-				{
-					// Manual serialization - exact original layout:
-					// [0] Count, [1-32] Mark, [33-40] Name (8 bytes)
-					lpEntryPtr[41 * nEntryCount + 0] = lpGuild->Count;
-					memcpy(&lpEntryPtr[41 * nEntryCount + 1], lpGuild->Mark, 0x20u);
-					memcpy(&lpEntryPtr[41 * nEntryCount + 33], lpGuild->Name, 8u);
-
-					++nEntryCount;
-				}
-				++it;
+				lpMsg->btResult = 0;
 			}
 
-			nCleanupFlag = 0;  // End iterator scope
-		}
+			if (lpMsg->btResult == 1)
+			{
+				lpMsg->btRivalMemberNum = static_cast<BYTE>(lpUnion->m_mpRivalMember.size());
+				lpMsg->btUnionMemberNum = static_cast<BYTE>(lpUnion->m_mpUnionMember.size());
 
-		g_Sync.Unlock();
+				std::map<int, _GUILD_INFO_STRUCT*>::iterator it = lpUnion->m_mpUnionMember.begin();
+				std::map<int, _GUILD_INFO_STRUCT*>::iterator end = lpUnion->m_mpUnionMember.end();
+
+				while (it != end)
+				{
+					_GUILD_INFO_STRUCT* lpMember = it->second;
+
+					if (lpMember)
+					{
+						lpList[dwMemberCount].btMemberNum = lpMember->Count;
+
+						memcpy(lpList[dwMemberCount].szGuildName, lpMember->Name, sizeof(lpList[dwMemberCount].szGuildName));
+						memcpy(lpList[dwMemberCount].Mark, lpMember->Mark, sizeof(lpList[dwMemberCount].Mark));
+
+						++dwMemberCount;
+					}
+					++it;
+				}
+			}
+
+			g_Sync.Unlock();
+		}
+		else
+		{
+			lpMsg->btResult = 0;
+		}
 	}
 	else
 	{
-		// Guild not found or not in union
-		lpBuf[5] = 0;
+		lpMsg->btResult = 0;
 	}
-
-	// 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式
-	// Finalize and send packet
-	// 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式
-	if (nEntryCount <= 100)
+	
+	if (dwMemberCount <= 100)
 	{
-		lpBuf[4] = static_cast<unsigned char>(nEntryCount);  // btGuildCount
-
-		// Set packet header: opcode 0xE9, size = 16 + (41 * count)
-		PHeadSetW(lpBuf, 0xE9u, 41 * nEntryCount + 16);
-
-		// Send packet - size field is WORD at offset 1, protocol may require byte-swap
-		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, lpBuf, _byteswap_ushort(*(WORD*)(lpBuf + 1)));
-
-		//lpBuf[4] = (BYTE)v10;  // Actual member count
-		//PHeadSetW(lpBuf, 0xE9, 41 * v10 + 16);
-
-		//// Send using size from packet header (byteswapped)
-		//WORD packetSize = _byteswap_ushort(*(WORD*)(lpBuf + 1));
-		//WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, lpBuf, packetSize);
+		WORD PacketSize = sizeof(EXSDHP_UNION_LIST_COUNT) + sizeof(EXSDHP_UNION_LIST) * dwMemberCount;
+		PHeadSetW(reinterpret_cast<LPBYTE>(lpMsg), 0xE9, PacketSize);
+		WzIoEngine->send(gsm.m_Obj[iServerIndex].lpPHD, reinterpret_cast<LPBYTE>(lpMsg), _byteswap_ushort(*reinterpret_cast<WORD*>(&lpMsg->h.sizeH)));
 	}
 }
 
@@ -2912,7 +2880,7 @@ void DGRelationShipListSend(_GUILD_INFO_STRUCT* lpGuildInfo, int iRelationShipTy
 
 		if (lpGuildInfo->iGuildUnion != 0)
 		{
-			memcpy(pMsg.szUnionMasterGuildName, pUnionExInfo->m_szMasterGuild, 8);
+			memcpy(pMsg.szUnionMasterGuildName, pUnionExInfo->m_szMasterGuild, MAX_GUILDNAMESTRING);
 		}
 		else
 		{
@@ -2948,7 +2916,7 @@ void DGRelationShipListSend(_GUILD_INFO_STRUCT* lpGuildInfo, int iRelationShipTy
 
 		if (lpGuildInfo->iGuildUnion != 0)
 		{
-			memcpy(pMsg.szUnionMasterGuildName, pUnionExInfo->m_szMasterGuild, 8);
+			memcpy(pMsg.szUnionMasterGuildName, pUnionExInfo->m_szMasterGuild, MAX_GUILDNAMESTRING);
 		}
 		else
 		{
@@ -2998,10 +2966,10 @@ void GDRelationShipReqKickOutUnionMember(EXSDHP_KICKOUT_UNIONMEMBER_REQ* lpMsg, 
 	unsigned __int8 btResult = 0;
 
 	// Extract guild names from request (max 8 chars each)
-	memset(szUnionMasterGuildName, 0, 9);
-	memset(szUnionMemberGuildName, 0, 9);
-	memcpy(szUnionMasterGuildName, lpMsg->szUnionMasterGuildName, 8);
-	memcpy(szUnionMemberGuildName, lpMsg->szUnionMemberGuildName, 8);
+	memset(szUnionMasterGuildName, 0, MAX_GUILDNAMESTRING + 1);
+	memset(szUnionMemberGuildName, 0, MAX_GUILDNAMESTRING + 1);
+	memcpy(szUnionMasterGuildName, lpMsg->szUnionMasterGuildName, MAX_GUILDNAMESTRING);
+	memcpy(szUnionMemberGuildName, lpMsg->szUnionMemberGuildName, MAX_GUILDNAMESTRING);
 
 	// Look up both guilds
 	_GUILD_INFO_STRUCT* lpUnionMasterGuild = CGuildManager.SearchGuild(szUnionMasterGuildName);
@@ -3056,8 +3024,8 @@ void GDRelationShipReqKickOutUnionMember(EXSDHP_KICKOUT_UNIONMEMBER_REQ* lpMsg, 
 	pMsg.wRequestUserIndex = lpMsg->wRequestUserIndex;
 	pMsg.btResult = btResult;
 	pMsg.btRelationShipType = lpMsg->btRelationShipType;
-	memcpy(pMsg.szUnionMasterGuildName, lpUnionMasterGuild->Name, 8);
-	memcpy(pMsg.szUnionMemberGuildName, lpUnionMemberGuild->Name, 8);
+	memcpy(pMsg.szUnionMasterGuildName, lpUnionMasterGuild->Name, MAX_GUILDNAMESTRING);
+	memcpy(pMsg.szUnionMemberGuildName, lpUnionMemberGuild->Name, MAX_GUILDNAMESTRING);
 	pMsg.btFlag = 1;  // Override with 1 (direct response flag)
 
 	// Send response to requesting server

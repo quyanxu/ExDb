@@ -136,6 +136,7 @@
     <ClCompile Include="GuildClass.cpp" />
     <ClCompile Include="CQuery.cpp" />
     <ClCompile Include="GuildListDlg.cpp" />
+    <ClCompile Include="Hash.cpp" />
     <ClCompile Include="MThread.cpp" />
     <ClCompile Include="PartyMatching.cpp" />
     <ClCompile Include="PlusLogDlg.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="TUnionEx.cpp" />
     <ClCompile Include="TUnionExInfo.cpp" />
+    <ClCompile Include="WZAsyncEngine.cpp" />
     <ClCompile Include="WZIocpEngine.cpp" />
     <ClCompile Include="WzQueue.cpp" />
     <ClCompile Include="WZWinsockBase.cpp" />

@@ -79,7 +79,6 @@ struct _SEND_PARTYMEMBER_INFO//28
 		this->bFlag = 0;
 		this->nUserIndex = -1;
 		this->nServerChannel = -1;
-		this->nServerChannel = -1;
 	}
 	int  bUse;
 	int  bFlag;
@@ -228,7 +227,7 @@ struct _tagPMSG_REQ_GENS_REWARD_EXDB
 	}
 
 	PBMSG_HEAD2 h;               // 0x00: 4 bytes: C1:F8:0C
-	char szCharName[11];         // 0x04: 11 bytes
+	char szCharName[MAX_IDSTRING + 1];         // 0x04: 11 bytes
 	int iInfluence;              // 0x10: 4 bytes (aligned)
 	BYTE NumberH;     // 0x14: 1 byte
 	BYTE NumberL;     // 0x15: 1 byte
@@ -714,10 +713,10 @@ struct FHP_WAITFRIENDLIST_COUNT
 struct SDHP_GUILDDESTROY
 {
 	PBMSG_HEAD h;
-	unsigned __int8 NumberH;
-	unsigned __int8 NumberL;
-	char GuildName[8];
-	char Master[10];
+	BYTE NumberH;
+	BYTE NumberL;
+	char GuildName[MAX_GUILDNAMESTRING];
+	char Master[MAX_IDSTRING];
 };
 
 /* 5336 */
@@ -1237,6 +1236,25 @@ struct EXSDHP_UNION_LIST_REQ//12
 	int iUnionMasterGuildNumber;
 };
 
+/* 5388 */
+struct EXSDHP_UNION_LIST_COUNT
+{
+	PWMSG_HEAD h;                // 0x00
+	BYTE btCount;                // 0x04
+	BYTE btResult;               // 0x05
+	WORD wRequestUserIndex;      // 0x06
+	DWORD iTimeStamp;            // 0x08
+	BYTE btRivalMemberNum;       // 0x0C
+	BYTE btUnionMemberNum;       // 0x0D
+};
+
+/* 5389 */
+struct EXSDHP_UNION_LIST
+{
+	BYTE btMemberNum;
+	BYTE Mark[MAX_GUILDMARKBUFFER];
+	char szGuildName[MAX_GUILDNAMESTRING];
+};
 
 /* 5390 */
 struct EXSDHP_KICKOUT_UNIONMEMBER_REQ//24
@@ -1391,7 +1409,7 @@ struct _stAnsWaitGuildMatchingList
 	int nUserIndex;
 	int nListCount;
 	int nResult;
-	_stGuildMatchingAllowList stAllowList[80];
+	_stGuildMatchingAllowList stAllowList[MAX_GUILD];
 };
 
 /* 5407 */
@@ -1602,11 +1620,11 @@ void GSGuildCreate(SDHP_GUILDCREATE* lpMsg, int aIndex);
 void DGGuildMemberInfoRequest(SDHP_GUILDMEMBER_INFO_REQUEST* lpMsg, int aIndex);
 void DGGuildMemberInfoSend(int aIndex, char* name, short pServer);
 void GDGuildAllSend(int aIndex, char* GuildName);
-void GDGuildAllSend(int aIndex, SDHP_GUILDMEMBER_INFO_GUILDNAME_REQUEST* aRecv);
+void GDGuildAllSend(int aIndex, SDHP_GUILDMEMBER_INFO_GUILDNAME_REQUEST* lpRecv);
 int DGGuildInfoSend(int aIndex, char* guildName, char* guildMaster, BYTE* mark, int score, WORD number);
 void DGGuildInfoSendState(int aIndex, BYTE state, int count);
 void GDGuildListRequest();
-void DGGuildInfoAllSend(char* guildname, char* guildmaster, unsigned __int8* mark, int score, unsigned __int16 number);
+void DGGuildInfoAllSend(char* guildname, char* guildmaster, unsigned char* mark, int score, unsigned short number);
 void GDGuildDestroy(SDHP_GUILDDESTROY* lpMsg, int aIndex);
 void GDGuildMemberAdd(SDHP_GUILDMEMBERADD* lpMsg, int aIndex);
 void GDGuildMemberAddWithoutUserIndex(SDHP_GUILDMEMBERADD_WITHOUT_USERINDEX* lpMsg, int aIndex);
@@ -1617,7 +1635,7 @@ void GDGuildNoticeRecv(SDHP_GUILDNOTICE* lpMsg);
 void DGFriendList(_FRIEND_INFO_STRUCT* lpNode, int aIndex);
 int DGWaitFriendList(int GUID, char* Name, __int16 Number, int aIndex);
 void GDFrinedListReq(FHP_FRIENDLIST_REQ* lpMsg, int aIndex);
-void DGFriendStateSend(char* Name, char* FriendName, unsigned __int8 State, __int16 Number, int aIndex);
+void DGFriendStateSend(char* Name, char* FriendName, unsigned char State, short Number, int aIndex);
 void DGFriendOfflineSend(char* szName);
 void DGFriendStateAllSend(_FRIEND_INFO_STRUCT* lpNode);
 void DGFriendStateAllSend(_FRIEND_INFO_STRUCT* lpNode, __int16 number, int aIndex, unsigned __int8 state);
@@ -1697,4 +1715,4 @@ void GDSendChattingMsgPartyMatching(_stReqChattingPartyMatching* lpMsg);
 void GDReqSwapPartyLeader(_stReqChangePartyLeader* lpMsg, int iServerIndex);
 void GDReqSendPartyMemberList(__stReqSendPartyMemberList* lpMsg);
 void DGClearPartyWaitListForOldLeader(char* szLeaderName);
-void DGSendDelTypePartyMember(char* szLeaderName, char* szTargetName, unsigned __int8 btDelType);
+void DGSendDelTypePartyMember(char* szLeaderName, char* szTargetName, BYTE btDelType);
